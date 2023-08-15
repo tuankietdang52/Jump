@@ -13,6 +13,7 @@
             <TextBlock x:Name="HiScore" HorizontalAlignment="Center" Margin="0,494,0,0" TextWrapping="Wrap" Text="Highest Score: 0" VerticalAlignment="Top" Height="55" Width="208" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
             <TextBlock x:Name="BulletAmount" HorizontalAlignment="Left" Margin="54,434,0,0" TextWrapping="Wrap" Text="Bullet: " VerticalAlignment="Top" Height="55" Width="304" FontSize="30" TextAlignment="Left" FontWeight="Bold" Foreground="Yellow"/>
             <TextBlock x:Name="Map" HorizontalAlignment="Left" Margin="669,434,0,0" TextWrapping="Wrap" Text="Map: " VerticalAlignment="Top" Height="55" Width="304" FontSize="30" TextAlignment="Left" FontWeight="Bold" Foreground="Purple"/>
+            <TextBlock x:Name="Money" HorizontalAlignment="Left" Margin="54,494,0,0" TextWrapping="Wrap" Text="Money: " VerticalAlignment="Top" Height="55" Width="304" FontSize="30" TextAlignment="Left" FontWeight="Bold" Foreground="LightGreen"/>
             <Rectangle HorizontalAlignment="Center" Height="634" Stroke="Black" VerticalAlignment="Center" Width="1002" x:Name="BlackBackground" Focusable="False">
                 <Rectangle.Fill>
                     <SolidColorBrush Color="Black" Opacity="0"/>

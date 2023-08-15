@@ -80,6 +80,7 @@ namespace Jump
         }
 
         // CHILDREN ENTITY SPECIFIC FUNCTION //
+
         public virtual void DemonTurn() { }
 
         // GET SET //
@@ -104,6 +105,7 @@ namespace Jump
 
 
         // HIT PLAYER //
+
         public bool CheckHitPlayer(double pos)
         {
             if (HitPlayer(pos))
@@ -128,27 +130,6 @@ namespace Jump
 
 
         // MOVE METHOD //
-
-        public async Task MoveType(Entity entitytype)
-        {
-            switch (entitytype)
-            {
-                case GoldFish:
-                    await Move();
-                    break;
-                case Demon:
-                    await Move();
-                    break;
-                case Bush:
-                    await Move();
-                    break;
-                case Mine:
-                    await Move();
-                    break;
-                default:
-                    return;
-            }
-        }
         
         public void ChangePositionMove(ref double pos)
         {

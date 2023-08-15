@@ -21,10 +21,19 @@ namespace Jump
 {
     public class Bullet
     {
-        public Rectangle bullet = new Rectangle();
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
+
         public double posout { get; set; }
+        public double speed { get; set; }
+
+        public string? gunsoundpath;
+
         public List<Entity>? entities { get; set; }
+        public Rectangle bullet = new Rectangle();
+        public MediaPlayer gunsound = new MediaPlayer();
+        public Gun gun = new Gun();
+        public PlayerCharacter? player { get; set; }
+
         public Bullet()
         {
             bullet.Height = 10;
@@ -36,15 +45,25 @@ namespace Jump
             };
             bullet.Margin = new Thickness(0, 0, 500, posout + 30);
         }
+
+        public void PlayShootSound()
+        {
+            gun.getGunsound(ref gunsoundpath!, player!.indexgun);
+            gunsound.Open(new (gunsoundpath!));
+            gunsound.Volume = 1;
+            gunsound.Play();
+        }
+
         public async Task Move()
         {
+            speed = gun.getBulletspeed(player!.indexgun);
             double bulletpos = bullet.Margin.Right;
             while (bullet.Margin.Right > -1000)
             {
                 bullet.Margin = new Thickness(0, 0, bulletpos, posout + 30);
                 TimeSpan bulletmove = TimeSpan.FromSeconds(0.007);
                 await Task.Delay(bulletmove);
-                bulletpos -= 100;
+                bulletpos -= speed;
                 if (HitEntity(bulletpos))
                 {
                     return;
@@ -61,7 +80,7 @@ namespace Jump
             {
                 if (bullet.Margin.Bottom >= entities[entityindex].getHitboxHeight() - 60 && bullet.Margin.Bottom <= entities[entityindex].getHitboxHeight() + 60)
                 {
-                    if (bulletpos >= entities[entityindex].getHitbox() && bulletpos <= entities[entityindex].getHitbox() + 100)
+                    if (bulletpos <= entities[entityindex].getHitbox())
                     {
                         if (entities[entityindex].IsHarmless) return false;
                         entities[entityindex].getHit = true;

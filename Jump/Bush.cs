@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -65,13 +66,36 @@ namespace Jump
 
                 Showup(pos);
 
-                if (CheckHitPlayer(pos)) return;
+                if (CheckHitPlayer(pos))
+                {
+                    KillAnimation();
+                    player.IsVietCongKilled = true;
+                    return;
+                }
 
                 if (getHit)
                 {
                     soundplay.Stop();
                     return;
                 }
+            }
+        }
+
+        public async void KillAnimation()
+        {
+            Thickness newmargin = entity!.Margin;
+            newmargin.Bottom = 80;
+            newthickness = newmargin;
+            await RenderPicture();
+        }
+
+        public async Task RenderPicture()
+        {
+            SetNewEntity(177, 120);
+            for (int i = 1; i <= 3; i++)
+            {
+                newpathimg = pathpic + "vietcongkill" + Convert.ToString(i) + ".png";
+                await Task.Delay(200);
             }
         }
 

@@ -20,11 +20,16 @@ namespace Jump
         public int speeddemon { get; set; }
         public int entitychance { get; set; }
 
+        public int limitphase = 2;
+
         public async Task ChangePhase()
         {
             Random spawn = new Random();
             int spawnindex = spawn.Next(200);
             SpawnMag(spawnindex);
+
+            if (phase > limitphase) phase = limitphase;
+
             switch (phase)
             {
                 case 1:
@@ -41,8 +46,6 @@ namespace Jump
                     break;
 
                 default:
-                    phase--;
-                    await ChangePhase();
                     return;
             }
         }
