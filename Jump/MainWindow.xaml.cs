@@ -124,9 +124,9 @@ namespace Jump
                     ImageSource = new BitmapImage(new(pathpic + "Title.png")),
                     Stretch = Stretch.Fill,
                 },
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Top,
             };
+
+            Canvas.SetLeft(Title, 150);
 
             RegisterName(Title.Name, Title);
             Playground.Children.Add(Title);
@@ -174,6 +174,8 @@ namespace Jump
 
             startstack.Children.Add(starttxt);
 
+            Canvas.SetLeft(start, 345);
+            Canvas.SetTop(start, 225);
 
             Playground.Children.Add(start);
         }
@@ -353,6 +355,8 @@ namespace Jump
 
         public void ScoreUp(int amountscore)
         {
+            GunScore(ref amountscore);
+
             score += amountscore;
             Score.Text = "Score: " + score;
 
@@ -387,7 +391,18 @@ namespace Jump
                     ScoreUp(2); 
                     break;
             }
+        }
 
+        public void GunScore(ref int amountscore)
+        {
+            switch (player.indexgun)
+            {
+                case 1:
+                    amountscore = amountscore / 2;
+                    break;
+                default:
+                    return;
+            }
         }
 
         // SOUND AND MUSIC //
@@ -447,6 +462,8 @@ namespace Jump
 
             VoiceStart();
 
+            player.setDefault();
+            player.Default();
             await Task.Delay(2000);
 
             if (!IsChangeMap) FirstStartGame();
@@ -473,33 +490,33 @@ namespace Jump
                     await Reload();
                     AmountBullet();
                 }
-
+            
                 setphase.phase = phase;
                 timetochangemov.Start();
-
+            
                 //await Task.Delay(1);
 
                 await setphase.ChangePhase();
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
-
-                if (elapsedtime >= timechange)
+            
+                if (elapsedtime >= 100)
                 {
                     timetochangemov.Restart();
                     changetime++;
                 }
-
+            
                 if (changetime > limitchangetime)
                 {
                     changetime = limitchangetime;
                     continue;
                 }
-
+            
                 if (changetime % 3 == 0 && changetime != 0)
                 {
                     mapindex++;
                     changetime++;
-
+            
                     ClearEntity();
                     
                     try
@@ -511,13 +528,13 @@ namespace Jump
                         MessageBox.Show(ex.Message);
                         this.Close();
                     }
-
-                    return;
+            
+                   return;
                 }
 
             }
 
-            GameOver();
+                GameOver();
         }
 
         public void ChangeElementMap()
@@ -551,6 +568,9 @@ namespace Jump
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Top
             };
+
+            Canvas.SetLeft(DeadTitle, 40);
+            Canvas.SetTop(DeadTitle, -40);
 
             RegisterName(DeadTitle.Name, DeadTitle);
 
@@ -595,6 +615,9 @@ namespace Jump
             replay.Content = replaystack;
             replay.Click += HandleReplay;
 
+            Canvas.SetLeft(replay, 345);
+            Canvas.SetTop(replay, 225);
+
             Playground.Children.Add(replay);
         }
 
@@ -611,6 +634,7 @@ namespace Jump
             string themedead = pathsound + "Bachram.mp3";
             PlayTheme(themedead, 1);
 
+            player.Die(killer);
             await Task.Delay(10000);
 
             if (!IsReplay) return;
@@ -629,6 +653,11 @@ namespace Jump
         {
             player.Die(killer);
 
+            Main.KeyDown -= KeyCommand;
+            Main.KeyUp -= ReleaseKey;
+
+            if (!player.IsDefaultDead) Thread.Sleep(1000);
+
             Random voicedead = new Random();
             int voicedeadindex = voicedead.Next(1, 3);
             string deadvoice = pathsound + "voicedead" + voicedeadindex + ".mp3";
@@ -639,12 +668,8 @@ namespace Jump
 
             CreateButtonReplay();
 
-            Main.KeyDown -= KeyCommand;
-            Main.KeyUp -= ReleaseKey;
-
             Main.KeyDown += ReplayKey;
-
-            player.playershape.Margin = new Thickness(0, 0, 700, 20);
+            player.setDefaultDead();
         }
 
         public void DeleteReplayElement()
@@ -664,11 +689,13 @@ namespace Jump
         public void ClearEntity()
         {
             if (entities.Count == 0) return;
-            for (int entityindex = 0; entityindex < entities.Count; entityindex++)
+
+            foreach (var entity in entities)
             {
-                entities[entityindex].soundplay.Stop();
-                Playground.Children.Remove(entities[entityindex].entity);
+                entity.soundplay.Stop();
+                Playground.Children.Remove(entity.entity);
             }
+
             entities.Clear();
         }
 
@@ -677,7 +704,7 @@ namespace Jump
             player.IsDead = false;
             player.IsVietCongKilled = false;
             player.indexgun = 0;
-            player.playershape.Margin = new Thickness(0, 0, 700, 80);
+            player.setDefault();
             player.inventory.Clear();
             player.inventory.Add("de");
             gun.getPathGun(player.indexgun);
@@ -758,7 +785,7 @@ namespace Jump
             {
                 ScoreUpType(entity);
                 GetMoneyType(entity);
-                Playground.Children.Remove(entity.entity);
+                if (!player.IsDead) Playground.Children.Remove(entity.entity);
             }
             else
             {
@@ -814,6 +841,7 @@ namespace Jump
         {
             if (magazinebullet < magazinebulletlimit) return;
 
+            bulletAmount = bulletlimit;
             magazinebullet = magazinebulletlimit;
         }
 
@@ -915,11 +943,10 @@ namespace Jump
 
             IsJump = true;
 
-            player.playershape.Height = 137;
-            player.playershape.Width = 86;
+            player.setDefault();
             player.jump = true;
 
-            player.Jump(this);
+            player.Jump();
         }
 
         private void HandleCrouch()
@@ -928,13 +955,11 @@ namespace Jump
 
             if (IsJump) return;
 
-            IsCrouch = true;
+            player.setDefault();
 
-            if (player.playershape.Margin.Bottom <= 86)
-            {
-                player.crouch = true;
-                player.Crouch();
-            }
+            IsCrouch = true;
+            player.crouch = true;
+            player.Crouch();
         }
 
         private void HandleShoot()
@@ -954,8 +979,10 @@ namespace Jump
             {
                 entities = this.entities,
                 player = this.player,
-                posout = player.playershape.Margin.Bottom,
+                posout = Canvas.GetTop(player.playershape),
             };
+
+            bullet.setPosition();
 
             Playground.Children.Add(bullet.bullet);
             player.Shoot(bullet, Playground);
@@ -968,15 +995,18 @@ namespace Jump
 
             if (IsJump) return;
 
+            player.setDefault();
             player.Default();
 
             if (player.IsDead) return;
 
-            player.playershape.Margin = new Thickness(0, 0, 700, 80);
         }
 
         private void ReleaseJ()
         {
+            var top = Canvas.GetTop(player.playershape);
+            if (top >= 250) Canvas.SetTop(player.playershape, 260);
+
             player.Default();
 
             if (player.IsDead) return;
@@ -1020,7 +1050,7 @@ namespace Jump
             ChangeGameVisibility(Visibility.Visible);
 
             player.crouch = false;
-            player.playershape.Margin = new Thickness(0, 0, 700, 80);
+            player.setDefault();
             player.Default();
             player.playershape.Visibility = Visibility.Visible;
 

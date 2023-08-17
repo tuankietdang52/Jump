@@ -94,9 +94,9 @@ namespace Jump
             switch (indexgun)
             {
                 case 0:
-                    return 100;
+                    return 50;
                 case 1:
-                    return 200;
+                    return 100;
                 default:
                     return 0;
             }

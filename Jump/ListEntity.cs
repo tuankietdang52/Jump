@@ -13,19 +13,19 @@ namespace Jump
             switch (main.changetime)
             {
                 case 0:
-                    entity.movementspeed = 50;
+                    entity.movementspeed = 30;
                     return;
 
                 case 1:
                     if (entity is GoldFish)
                     {
-                        entity.movementspeed = 100;
+                        entity.movementspeed = 50;
                         return;
                     }
                     break;
 
                 case 2:
-                    entity.movementspeed = 100;
+                    entity.movementspeed = 60;
                     main.timechange = 59;
                     return;
 
@@ -33,7 +33,7 @@ namespace Jump
                     return;
             }
 
-            entity.movementspeed = 50;
+            entity.movementspeed = 30;
         }
 
         public void SetSpeedMap2(Entity entity, MainWindow main)
@@ -43,21 +43,22 @@ namespace Jump
                 case 4:
                     if (entity is Mine)
                     {
-                        entity.movementspeed = 80;
+                        entity.movementspeed = 50;
                         return;
                     }
                     main.timechange = 40;
-                    entity.movementspeed = 50;
+                    entity.movementspeed = 35;
+                    entity.bulletspeed = 70;
                     return;
 
                 case 5:
                     if (entity is Mine)
                     {
-                        entity.movementspeed = 100;
+                        entity.movementspeed = 70;
                         return;
                     }
-                    entity.movementspeed = 70;
-                    entity.bulletspeed = 200;
+                    entity.movementspeed = 50;
+                    entity.bulletspeed = 90;
                     main.timechange = 59;
                     return;
 

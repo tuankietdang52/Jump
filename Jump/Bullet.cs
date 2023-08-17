@@ -43,7 +43,18 @@ namespace Jump
                 ImageSource = new BitmapImage(new(pathpic + "bullet.png")),
                 Stretch = Stretch.Fill,
             };
-            bullet.Margin = new Thickness(0, 0, 500, posout + 30);
+        }
+
+        public void setPosition()
+        {
+            var left = Canvas.GetLeft(player!.playershape);
+
+            Canvas.SetLeft(bullet, left + 80);
+
+            var top = Canvas.GetTop(player!.playershape);
+            
+            if (top >= 250) Canvas.SetTop(bullet, posout + 30);
+            else Canvas.SetTop(bullet, posout + 50);
         }
 
         public void PlayShootSound()
@@ -57,33 +68,49 @@ namespace Jump
         public async Task Move()
         {
             speed = gun.getBulletspeed(player!.indexgun);
-            double bulletpos = bullet.Margin.Right;
-            while (bullet.Margin.Right > -1000)
+            double bulletpos = Canvas.GetLeft(bullet);
+
+            while (bulletpos < 1000)
             {
-                bullet.Margin = new Thickness(0, 0, bulletpos, posout + 30);
+                Canvas.SetLeft(bullet, bulletpos);
                 TimeSpan bulletmove = TimeSpan.FromSeconds(0.007);
                 await Task.Delay(bulletmove);
-                bulletpos -= speed;
-                if (HitEntity(bulletpos))
+                bulletpos += speed;
+
+                if (HitEntity())
                 {
                     return;
                 }
             }
         }
-        public bool HitEntity(double bulletpos)
+        public bool HitEntity()
         {
             if (entities!.Count == 0)
             {
                 return false;
             }
-            for (int entityindex = 0; entityindex < entities.Count; entityindex++)
+
+            var left = Canvas.GetLeft(bullet);
+            var top = Canvas.GetTop(bullet);
+            Rect bullethitbox = new Rect(left, top, bullet.Width, bullet.Height);
+
+            foreach (var entity in entities)
             {
-                if (bullet.Margin.Bottom >= entities[entityindex].getHitboxHeight() - 60 && bullet.Margin.Bottom <= entities[entityindex].getHitboxHeight() + 60)
+                if (entity.IsHarmless) continue;
+
+                var entityhitbox = entity.getHitbox();
+                var entitytop = Canvas.GetTop(entity.entity);
+                var entityleft = Canvas.GetLeft(entity.entity);
+                if (bullethitbox.IntersectsWith(entityhitbox))
                 {
-                    if (bulletpos <= entities[entityindex].getHitbox())
+                    entity.getHit = true;
+                    return true;
+                }
+                else if (left >= entityleft)
+                {
+                    if (top >= entitytop && top <= entitytop + entity.entity!.Height)
                     {
-                        if (entities[entityindex].IsHarmless) return false;
-                        entities[entityindex].getHit = true;
+                        entity.getHit = true;
                         return true;
                     }
                 }

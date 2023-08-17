@@ -30,7 +30,11 @@ namespace Jump
         {
             height = 30;
             width = 50;
-            thickness = new Thickness(0, 0, -1000, -30);
+
+            left = 1000;
+            top = 320;
+
+            newtop = 180;
 
             pathimgentity = pathpic + "mine.png";
             newpathimg = pathpic + "explode.png";
@@ -42,8 +46,8 @@ namespace Jump
 
         public override async Task Move()
         {
-            double pos = entity!.Margin.Right;
-            while (pos < 1000)
+            double pos = Canvas.GetLeft(this.entity);
+            while (pos > 0)
             {
 
                 if (player!.IsDead) return;
@@ -53,9 +57,10 @@ namespace Jump
 
                 ChangePositionMove(ref pos);
 
-                if (CheckHitPlayer(pos))
+                if (CheckHitPlayer())
                 {
-                    newthickness = entity.Margin;
+                    Canvas.SetLeft(this.entity, pos);
+                    Canvas.SetTop(this.entity, top);
                     Explode();
                     return;
                 }
@@ -67,6 +72,12 @@ namespace Jump
             string soundpath = pathsound + "explodesound.mp3";
             SetNewEntity(300, 300);
             Playsound(soundpath);
+        }
+
+        public override Rect getHitbox()
+        {
+            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
+            return hitbox;
         }
     }
 }

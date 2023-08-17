@@ -27,6 +27,7 @@ namespace Jump
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
         public Rectangle bush = new Rectangle();
         public bool IsShoot = false;
+        public bool DoneShoot = false;
         public Bush()
         {
             height = 80;
@@ -34,25 +35,36 @@ namespace Jump
             bulletheight = 10;
             bulletwidth = 30;
 
-            thickness = new Thickness(0, 0, -1000, 0);
-            entity = bush;
+            left = 1000;
+            top = 275;
+
+            newtop = 190;
 
             pathimgentity = pathpic + "bush.png";
             newpathimg = pathpic + "vietcong.png";
             bulletpath = pathpic + "kar98bullet.png";
 
+            entity = bush;
+
             Random IsEnemyRandom = new Random();
             int IsEnemyRandomindex = IsEnemyRandom.Next(2);
+
             if (IsEnemyRandomindex == 0) IsHarmless = true;
             else IsHarmless = false;
 
             SetEntity();
         }
 
+        public override Rect getHitbox()
+        {
+            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
+            return hitbox;
+        }
+
         public override async Task Move()
         {
-            double pos = entity!.Margin.Right;
-            while (pos < 1000)
+            double pos = Canvas.GetLeft(this.entity);
+            while (pos > -30)
             {
 
                 if (player!.IsDead) return;
@@ -64,12 +76,13 @@ namespace Jump
 
                 if (IsHarmless) continue;
 
-                Showup(pos);
+                if (pos <= 500) GetDown(pos);
+                else if (pos <= 800) Showup(pos);
 
-                if (CheckHitPlayer(pos))
+                if (CheckHitPlayer())
                 {
-                    KillAnimation();
                     player.IsVietCongKilled = true;
+                    await RenderPicture();
                     return;
                 }
 
@@ -83,29 +96,29 @@ namespace Jump
 
         public async void KillAnimation()
         {
-            Thickness newmargin = entity!.Margin;
-            newmargin.Bottom = 80;
-            newthickness = newmargin;
+            newleft = Canvas.GetLeft(this.entity);
             await RenderPicture();
         }
 
         public async Task RenderPicture()
         {
-            SetNewEntity(177, 120);
             for (int i = 1; i <= 3; i++)
             {
                 newpathimg = pathpic + "vietcongkill" + Convert.ToString(i) + ".png";
+                SetNewEntity(177, 120);
                 await Task.Delay(200);
             }
         }
 
-        public async void CreateEnemyBullet(double pos)
+        public async void CreateEnemyBullet(double left)
         {
             string pathsoundeffect = pathsound + "kar98.mp3";
             string bulletpath = pathpic + "kar98bullet.png";
 
             EnemyBullet enemyBullet = new EnemyBullet(bulletpath!, player!, playground!, bulletspeed);
-            enemyBullet.SetBulletElement(10, 30, pos, 150);
+            enemyBullet.SetBulletElement(10, 30, left, 250);
+
+            main!.entities.Add(enemyBullet);
             playground!.Children.Add(enemyBullet.entity);
 
             Playsound(pathsoundeffect);
@@ -114,24 +127,22 @@ namespace Jump
 
         public void Showup(double pos)
         {
-            if (pos >= 200 && IsShoot)
+            if (!IsShoot)
             {
-                Thickness newmargin = entity!.Margin;
-                newmargin.Bottom = 0;
-                thickness = newmargin;
-
-                SetEntity();
-            }
-
-            else if (pos >= -500 && !IsShoot)
-            {
-                Thickness newmargin = entity!.Margin;
-                newmargin.Bottom = 80;
-                newthickness = newmargin;
                 IsShoot = true;
 
                 SetNewEntity(177, 120);
-                CreateEnemyBullet(pos + 200);
+                CreateEnemyBullet(pos - 30);
+            }
+        }
+
+        public void GetDown(double pos)
+        {
+            if (IsShoot)
+            {
+                left = Canvas.GetLeft(this.entity);
+                SetEntity();
+                DoneShoot = true;
             }
         }
     }

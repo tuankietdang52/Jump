@@ -26,7 +26,7 @@ namespace Jump
     {
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
         public Rectangle enemybullet = new Rectangle();
-        public EnemyBullet(string bulletimg, PlayerCharacter player, Grid playground, int speed)
+        public EnemyBullet(string bulletimg, PlayerCharacter player, Canvas playground, int speed)
         {
             pathimgentity = bulletimg;
             this.player = player;
@@ -36,14 +36,23 @@ namespace Jump
         }
 
 
-        public void SetBulletElement(int bulletheight, int bulletwidth, double right, double bottom)
+        public void SetBulletElement(int bulletheight, int bulletwidth, double left, double top)
         {
             height = bulletheight;
             width = bulletwidth;
-            thickness = new Thickness(0, 0, right, bottom);
+
+            this.left = left;
+            this.top = top;
+
             entity = enemybullet;
 
             SetEntity();
+        }
+
+        public override Rect getHitbox()
+        {
+            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height - 5);
+            return hitbox;
         }
     }
 }

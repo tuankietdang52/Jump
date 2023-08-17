@@ -23,14 +23,14 @@ namespace Jump
     {
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
-        public Thickness newthickness { get; set; }
 
         public PlayerCharacter? player { get; set; }
         public Rectangle? entity { get; set; }
         public MediaPlayer soundplay = new MediaPlayer();
-        public Grid? playground { get; set; }
+        public Canvas? playground { get; set; }
         public MainWindow? main { get; set; }
-        public Thickness thickness { get; set; }
+
+        public Rect entityhitbox;
 
         public string? bulletpath { get; set; }
         public string? newpathimg { get; set; }
@@ -41,6 +41,10 @@ namespace Jump
         public string? pathimgentity { get; set; }
         public int height { get; set; }
         public int width { get; set; }
+        public double left { get; set; }
+        public double top { get; set; }
+        public double newleft { get; set; }
+        public double newtop { get; set; }
         public int bulletheight { get; set; }
         public int bulletwidth { get; set; }
 
@@ -48,7 +52,6 @@ namespace Jump
         public bool IsHarmless = false;
 
         public int turn = 0;
-        public int playerhitbox = 80;
         public int bulletspeed = 100;
 
         public Entity() { }
@@ -59,27 +62,34 @@ namespace Jump
         {
             entity!.Height = height;
             entity!.Width = width;
-            entity.Margin = thickness;
             entity.Fill = new ImageBrush
             {
                 ImageSource = new BitmapImage(new(pathimgentity!)),
                 Stretch = Stretch.Fill,
             };
+
+            Canvas.SetLeft(entity, left);
+            Canvas.SetTop(entity, top);
         }
 
         public void SetNewEntity(int newheight, int newwidth)
         {
             entity!.Height = newheight;
             entity!.Width = newwidth;
-            entity.Margin = newthickness;
             entity.Fill = new ImageBrush
             {
                 ImageSource = new BitmapImage(new (newpathimg!)),
                 Stretch = Stretch.Fill,
             };
+            Canvas.SetTop(entity, newtop);
         }
 
         // CHILDREN ENTITY SPECIFIC FUNCTION //
+
+        public virtual Rect getHitbox()
+        {
+            return new Rect(0, 0, 0, 0);
+        }
 
         public virtual void DemonTurn() { }
 
@@ -88,11 +98,6 @@ namespace Jump
         public double getHitboxHeight()
         {
             return entity!.Margin.Bottom;
-        }
-        
-        public double getHitbox()
-        {
-            return entity!.Margin.Right;
         }
         
         // SOUND EFFECT //
@@ -106,9 +111,9 @@ namespace Jump
 
         // HIT PLAYER //
 
-        public bool CheckHitPlayer(double pos)
+        public bool CheckHitPlayer()
         {
-            if (HitPlayer(pos))
+            if (HitPlayer())
             {
                 player!.IsDead = true;
                 return true;
@@ -116,15 +121,17 @@ namespace Jump
             return false;
         }
 
-        public bool HitPlayer(double entityhitbox)
+        public bool HitPlayer()
         {
-            if (entity!.Margin.Bottom <= player!.getHeight() + player!.playershape.Height && entity!.Margin.Bottom >= player!.getHeight() - 200)
-            {
-                if (entityhitbox >= player!.playerhitboxright && entityhitbox <= 800)
-                {
-                    return true;
-                }
-            }
+            var playershape = player!.playershape;
+            var playerleft = Canvas.GetLeft(playershape);
+            var playertop = Canvas.GetTop(playershape);
+
+            player.playerhitbox = new Rect(playerleft , playertop, playershape.Width - 50, playershape.Height);
+            entityhitbox = getHitbox();
+
+            if (player.playerhitbox.IntersectsWith(entityhitbox)) return true;
+
             return false;
         }
 
@@ -133,14 +140,14 @@ namespace Jump
         
         public void ChangePositionMove(ref double pos)
         {
-            entity!.Margin = new Thickness(0, 0, pos, getHitboxHeight());
-            pos += movementspeed;
+            Canvas.SetLeft(entity, pos);
+            pos -= movementspeed;
         }
 
         public virtual async Task Move()
         {
-            double pos = entity!.Margin.Right;
-            while (pos < 1000)
+            double pos = Canvas.GetLeft(entity);
+            while (pos > -30)
             {
                 if (player!.IsDead) return;
                 if (IsDemon) DemonTurn();
@@ -150,15 +157,15 @@ namespace Jump
 
                 ChangePositionMove(ref pos);
 
-                if (CheckHitPlayer(pos)) return;
+                if (CheckHitPlayer()) return;
                 if (getHit) return;
             }
         }
 
         public async Task BulletMove()
         {
-            double pos = entity!.Margin.Right;
-            while (pos < 1000)
+            double pos = Canvas.GetLeft(entity);
+            while (pos > 0)
             {
                 if (player!.IsDead) return;
 
@@ -167,7 +174,7 @@ namespace Jump
 
                 ChangePositionMove(ref pos);
 
-                if (CheckHitPlayer(pos))
+                if (CheckHitPlayer())
                 {
                     playground!.Children.Remove(entity);
                     return;

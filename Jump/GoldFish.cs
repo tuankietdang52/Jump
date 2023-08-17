@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,12 +28,21 @@ namespace Jump
         {
             height = 60;
             width = 60;
-            thickness = new Thickness(0, 0, -1000, 10);
+
+            left = 1000;
+            top = 285;
+
             pathimgentity = pathpic + "goldfish.png";
 
             entity = goldFish;
 
             SetEntity();
+        }
+
+        public override Rect getHitbox()
+        {
+            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
+            return hitbox;
         }
     }
 }

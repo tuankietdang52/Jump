@@ -29,12 +29,21 @@ namespace Jump
         {
             height = 70;
             width = 50;
-            thickness = new Thickness(0, 0, -1000, 200);
+
+            left = 1000;
+            top = 170;
+
             pathimgentity = new(pathpic + "demonleft.png");
             mortissound.Open(new(pathsound + "mortis.mp3"));
             entity = demon;
             IsDemon = true;
             SetEntity();
+        }
+
+        public override Rect getHitbox()
+        {
+            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
+            return hitbox;
         }
 
         public override void DemonTurn()
