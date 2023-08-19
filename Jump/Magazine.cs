@@ -41,5 +41,19 @@ namespace Jump
             RandomTop();
             SetItem();
         }
+
+        public void MagIsTaken(ref int magazinebullet, ref int magazinebulletlimit, ref int bulletAmount, ref int bulletlimit)
+        {
+            magazinebullet += magazinebulletlimit;
+            CheckMagazine(ref magazinebullet, ref magazinebulletlimit, ref bulletAmount, ref bulletlimit);
+        }
+
+        public void CheckMagazine(ref int magazinebullet, ref int magazinebulletlimit, ref int bulletAmount, ref int bulletlimit)
+        {
+            if (magazinebullet < magazinebulletlimit) return;
+
+            bulletAmount = bulletlimit;
+            magazinebullet = magazinebulletlimit;
+        }
     }
 }

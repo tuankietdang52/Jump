@@ -465,12 +465,12 @@ namespace Jump
             player.setDefault();
             player.Default();
             await Task.Delay(2000);
-
+            
             if (!IsChangeMap) FirstStartGame();
             else ChangeElementMap();
-
+            
             await Task.Delay(500);
-
+            
             getHiScore();
             ShowMoney();
             AmountBullet();
@@ -485,6 +485,7 @@ namespace Jump
             while (!player.IsDead)
             {
                 InShop = false;
+
                 if (bulletAmount <= 0)
                 {
                     await Reload();
@@ -494,11 +495,9 @@ namespace Jump
                 setphase.phase = phase;
                 timetochangemov.Start();
             
-                await Task.Delay(500);
+               //await Task.Delay(1);
 
-                SpawnMag();
-
-                //await setphase.ChangePhase();
+                await setphase.ChangePhase();
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
             
@@ -723,20 +722,9 @@ namespace Jump
 
             timetochangemov.Restart();
 
-            phase = 1;
-            changetime = 0;
-            score = 0;
-            mapindex = 1;
-            volumeadjust = 0.2;
-            money = 0;
+            RestartNumberElement();
 
-            IsJump = false;
-            IsShoot = false;
-            IsCrouch = false;
-            IsReload = false;
-            IsBreakHiScore = false;
-            IsChangeMap = false;
-            NotChangeMap = false;
+            RestartBoolElement();
 
             Score.Text = "Score: 0";
 
@@ -752,6 +740,27 @@ namespace Jump
             theme.Stop();
         }
 
+        public void RestartBoolElement()
+        {
+            IsJump = false;
+            IsShoot = false;
+            IsCrouch = false;
+            IsReload = false;
+            IsBreakHiScore = false;
+            IsChangeMap = false;
+            NotChangeMap = false;
+        }
+
+        public void RestartNumberElement()
+        {
+            phase = 1;
+            changetime = 0;
+            score = 0;
+            mapindex = 1;
+            volumeadjust = 0.2;
+            money = 0;
+        }
+
         public void HandleReplay(object sender, RoutedEventArgs e)
         {
             Replay();
@@ -760,8 +769,10 @@ namespace Jump
         public void Replay()
         {
             ClearEntity();
+
             RestartElement();
             RestartEntitySpeed();
+
             GameStart();
         }
 
@@ -813,7 +824,9 @@ namespace Jump
             if (!player.IsDead) entities.Remove(entity);
         }
 
-        // BULLET AND MAGAZINE //
+        // ITEM //
+
+            // BULLET AND MAGAZINE //
 
         public void getAmountBullet()
         {
@@ -838,45 +851,14 @@ namespace Jump
 
             if (mag.IsTaken)
             {
-                magazinebullet += magazinebulletlimit;
-                CheckMagazine();
+
+                mag.MagIsTaken(ref magazinebullet, ref magazinebulletlimit, ref bulletAmount, ref bulletlimit);
                 AmountBullet();
             }
 
             Playground.Children.Remove(mag.item);
         }
 
-        public void CheckMagazine()
-        {
-            if (magazinebullet < magazinebulletlimit) return;
-
-            bulletAmount = bulletlimit;
-            magazinebullet = magazinebulletlimit;
-        }
-
-        public async Task Reload()
-        {
-            if (magazinebullet <= 0) return;
-
-            player.PlayReloadSound();
-
-            await Task.Delay(1600);
-
-            if (magazinebullet < bulletlimit)
-            {
-                bulletAmount = magazinebullet;
-                magazinebullet = 0;
-
-                IsReload = false;
-
-                return;
-            }
-
-            magazinebullet -= (bulletlimit - bulletAmount);
-            bulletAmount = bulletlimit;
-
-            IsReload = false;
-        }
 
         // KEY COMMAND //
 
@@ -935,6 +917,30 @@ namespace Jump
         }
 
         // HANDLE ACTION //
+
+        public async Task Reload()
+        {
+            if (magazinebullet <= 0) return;
+
+            player.PlayReloadSound();
+
+            await Task.Delay(1600);
+
+            if (magazinebullet < bulletlimit)
+            {
+                bulletAmount = magazinebullet;
+                magazinebullet = 0;
+
+                IsReload = false;
+
+                return;
+            }
+
+            magazinebullet -= (bulletlimit - bulletAmount);
+            bulletAmount = bulletlimit;
+
+            IsReload = false;
+        }
 
         private async void HandleReload()
         {
