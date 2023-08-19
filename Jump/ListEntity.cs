@@ -25,6 +25,11 @@ namespace Jump
                     break;
 
                 case 2:
+                    if (entity is Demon)
+                    {
+                        entity.movementspeed = 45;
+                        return;
+                    }
                     entity.movementspeed = 60;
                     main.timechange = 59;
                     return;

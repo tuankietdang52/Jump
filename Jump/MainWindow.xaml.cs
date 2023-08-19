@@ -75,7 +75,7 @@ namespace Jump
         public List<Entity> entities = new List<Entity>();
         public Phase setphase = new Phase();
         public ListGun listgun = new ListGun();
-        public Item item = new Item();
+        public Inventory item = new Inventory();
         public MainWindow()
         {
             InitializeComponent();
@@ -494,13 +494,15 @@ namespace Jump
                 setphase.phase = phase;
                 timetochangemov.Start();
             
-                //await Task.Delay(1);
+                await Task.Delay(500);
 
-                await setphase.ChangePhase();
+                SpawnMag();
+
+                //await setphase.ChangePhase();
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
             
-                if (elapsedtime >= 100)
+                if (elapsedtime >= timechange)
                 {
                     timetochangemov.Restart();
                     changetime++;
@@ -701,13 +703,17 @@ namespace Jump
 
         public void RestartPlayer()
         {
+            player.setDefault();
+
             player.IsDead = false;
             player.IsVietCongKilled = false;
+
             player.indexgun = 0;
-            player.setDefault();
+
             player.inventory.Clear();
             player.inventory.Add("de");
             gun.getPathGun(player.indexgun);
+
             player.Default();
         }
 
@@ -783,9 +789,12 @@ namespace Jump
         {
             if (entity.getHit)
             {
-                ScoreUpType(entity);
-                GetMoneyType(entity);
-                if (!player.IsDead) Playground.Children.Remove(entity.entity);
+                if (!player.IsDead)
+                {
+                    ScoreUpType(entity);
+                    GetMoneyType(entity);
+                    Playground.Children.Remove(entity.entity);
+                }
             }
             else
             {
@@ -801,7 +810,7 @@ namespace Jump
                 }
             }
 
-            entities.Remove(entity);
+            if (!player.IsDead) entities.Remove(entity);
         }
 
         // BULLET AND MAGAZINE //
@@ -823,7 +832,7 @@ namespace Jump
             Magazine mag = new Magazine();
             mag.player = player;
 
-            Playground.Children.Add(mag.magazine);
+            Playground.Children.Add(mag.item);
 
             await mag.Move();
 
@@ -834,7 +843,7 @@ namespace Jump
                 AmountBullet();
             }
 
-            Playground.Children.Remove(mag.magazine);
+            Playground.Children.Remove(mag.item);
         }
 
         public void CheckMagazine()
@@ -1261,7 +1270,7 @@ namespace Jump
 
         public void AddItemShop(string gunname, StackPanel stalls)
         {
-            Item newitem = new Item()
+            Inventory newitem = new Inventory()
             {
                 name = gunname,
                 main = this,
@@ -1302,7 +1311,7 @@ namespace Jump
 
             foreach (var item in player.inventory)
             {
-                Item newitem = new Item()
+                Inventory newitem = new Inventory()
                 {
                     IsBuy = true,
                     name = item,

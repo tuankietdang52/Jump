@@ -94,12 +94,6 @@ namespace Jump
             }
         }
 
-        public async void KillAnimation()
-        {
-            newleft = Canvas.GetLeft(this.entity);
-            await RenderPicture();
-        }
-
         public async Task RenderPicture()
         {
             for (int i = 1; i <= 3; i++)
