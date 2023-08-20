@@ -97,10 +97,14 @@ namespace Jump
             foreach (var entity in entities)
             {
                 if (entity.IsHarmless) continue;
+                if (entity.IsBullet) continue;
 
                 var entityhitbox = entity.getHitbox();
-                var entitytop = Canvas.GetTop(entity.entity);
-                var entityleft = Canvas.GetLeft(entity.entity);
+                var entitytop = entityhitbox.Top;
+                var entityleft = entityhitbox.Left;
+                var entityheight = entityhitbox.Height;
+
+
                 if (bullethitbox.IntersectsWith(entityhitbox))
                 {
                     entity.getHit = true;
@@ -108,7 +112,7 @@ namespace Jump
                 }
                 else if (left >= entityleft)
                 {
-                    if (top >= entitytop && top <= entitytop + entity.entity!.Height)
+                    if (top >= entitytop && top <= entitytop + entityheight)
                     {
                         entity.getHit = true;
                         return true;

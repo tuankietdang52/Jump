@@ -14,22 +14,33 @@ namespace Jump
         public MainWindow? main { get; set; }
         public ListEntity changeentity = new ListEntity();
 
+        public bool AlreadyHaveBoss = false;
+
 
         public int phase { get; set; }
         public int speedfish { get; set; }
         public int speeddemon { get; set; }
         public int entitychance { get; set; }
 
-        public int limitphase = 2;
+        public int limitphase = 3;
 
         public async Task ChangePhase()
         {
+            changeentity.main = this.main;
+
             Random spawn = new Random();
             int spawnindex = spawn.Next(200);
 
             SpawnItem(spawnindex);
 
             if (phase > limitphase) phase = limitphase;
+
+            if (main!.changetime % 3 == 0)
+            {
+                SpawnBoss();
+                await Task.Delay(1000);
+                return;
+            }
 
             switch (phase)
             {
@@ -46,9 +57,43 @@ namespace Jump
                     await Task.Delay(1000);
                     break;
 
+                case 3:
+                    entitychance = 100;
+                    Phase3(spawnindex);
+                    await Task.Delay(1000);
+                    break;
+
                 default:
                     return;
             }
+        }
+
+        public void SpawnBoss()
+        {
+            switch (phase)
+            {
+                case 1:
+                    Boss1();
+                    return;
+                default:
+                    main!.IsHaveBoss = false;
+                    main!.BossIsDefeated();
+                    return;
+            }
+        }
+
+        public async void Boss1()
+        {
+            if (!AlreadyHaveBoss && main!.IsHaveBoss)
+            {
+                Entity newentity = changeentity.ChangeEntityMap1(2);
+
+                AlreadyHaveBoss = true;
+
+                await main!.SpawnEntity(phase, newentity);
+
+            }
+            else return;
         }
 
 
@@ -69,7 +114,12 @@ namespace Jump
 
             Random randenemy = new Random();
             int enemyindex = randenemy.Next(2);
-            Entity newentity = changeentity.ChangeEntityMap1(enemyindex);
+
+            Entity newentity;
+
+            if (!main!.IsHaveBoss) newentity = changeentity.ChangeEntityMap1(enemyindex);
+            else return;
+
             changeentity.SetSpeedMap1(newentity, main!);
             await main!.SpawnEntity(phase, newentity);
 
@@ -84,7 +134,21 @@ namespace Jump
             Entity newentity = changeentity.ChangeEntityMap2(enemyindex);
             changeentity.SetSpeedMap2(newentity, main!);
             await main!.SpawnEntity(phase, newentity);
+        }
 
+        public async void Phase3(int spawnindex)
+        {
+            if (spawnindex > entitychance) return;
+
+            Random randenemy = new Random();
+            int enemyindex = randenemy.Next(2);
+
+            if (main!.IsSpawnPirate && enemyindex == 0) return;
+
+            Entity newentity = changeentity.ChangeEntityMap3(enemyindex);
+
+            changeentity.SetSpeedMap3(newentity, main!);
+            await main!.SpawnEntity(phase, newentity);
         }
     }
 }

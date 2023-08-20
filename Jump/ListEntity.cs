@@ -8,6 +8,7 @@ namespace Jump
 {
     public class ListEntity
     {
+        public MainWindow? main { get; set; }
         public void SetSpeedMap1(Entity entity, MainWindow main)
         {
             switch (main.changetime)
@@ -31,7 +32,16 @@ namespace Jump
                         return;
                     }
                     entity.movementspeed = 60;
-                    main.timechange = 59;
+                    main.timechange = 20;
+                    return;
+
+                case 3:
+                    if (entity is Demon)
+                    {
+                        entity.movementspeed = 45;
+                        return;
+                    }
+                    entity.movementspeed = 60;
                     return;
 
                 default:
@@ -74,6 +84,25 @@ namespace Jump
             }
         }
 
+        public void SetSpeedMap3(Entity entity, MainWindow main)
+        {
+            switch (main.changetime)
+            {
+                case 7:
+                    entity.bulletspeed = 30;
+                    return;
+
+                case 8:
+                    entity.bulletspeed = 30;
+                    return;
+
+                default:
+                    main.changetime--;
+                    SetSpeedMap3(entity, main);
+                    return;
+            }
+        }
+
         public Entity ChangeEntityMap1(int enemyindex)
         {
             Entity newentity;
@@ -83,10 +112,17 @@ namespace Jump
                     GoldFish goldFish = new GoldFish();
                     newentity = goldFish;
                     break;
+
                 case 1:
                     Demon demon = new Demon();
                     newentity = demon;
                     break;
+
+                case 2:
+                    BigGoldFish biggoldfish = new BigGoldFish();
+                    newentity = biggoldfish;
+                    break;
+
                 default:
                     return newentity = new Entity();
             }
@@ -106,6 +142,27 @@ namespace Jump
                 case 1:
                     Mine mine = new Mine();
                     newentity = mine;
+                    break;
+
+                default:
+                    return newentity = new Entity();
+            }
+            return newentity;
+        }
+
+        public Entity ChangeEntityMap3(int enemyindex)
+        {
+            Entity newentity;
+            switch (enemyindex)
+            {
+                case 0:
+                    PirateCaptain piratecap = new PirateCaptain();
+                    newentity = piratecap;
+                    break;
+
+                case 1:
+                    Warrior warrior = new Warrior();
+                    newentity = warrior;
                     break;
 
                 default:

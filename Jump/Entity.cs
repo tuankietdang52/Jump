@@ -29,6 +29,7 @@ namespace Jump
         public MediaPlayer soundplay = new MediaPlayer();
         public Canvas? playground { get; set; }
         public MainWindow? main { get; set; }
+        public Rectangle? healthbar = null;
 
         public Rect entityhitbox;
 
@@ -50,6 +51,9 @@ namespace Jump
 
         public bool IsDemon = false;
         public bool IsHarmless = false;
+        public bool IsBullet = false;
+        public bool IsDead = false;
+        public bool IsSpawn = false;
 
         public int turn = 0;
         public int bulletspeed = 100;
@@ -91,6 +95,28 @@ namespace Jump
             return new Rect(0, 0, 0, 0);
         }
 
+        public void CreateHealthBar(double health)
+        {
+            ScaleTransform flip = new ScaleTransform();
+            flip.ScaleX = -1;
+
+            healthbar = new Rectangle()
+            {
+                Width = health,
+                Height = 50,
+
+                Fill = Brushes.Red,
+
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = flip,
+            };
+
+            Canvas.SetRight(healthbar, 0);
+            Canvas.SetTop(healthbar, 0);
+
+            playground!.Children.Add(healthbar);
+        }
+
         public virtual void DemonTurn() { }
 
         // GET SET //
@@ -105,6 +131,7 @@ namespace Jump
         public void Playsound(string path)
         {
             soundplay.Open(new (path));
+            soundplay.Volume = 1;
             soundplay.Play();
         }
 
@@ -148,6 +175,17 @@ namespace Jump
             return false;
         }
 
+        // GET HIT //
+
+        public virtual bool CheckGetHit()
+        {
+            if (!player!.IsDead)
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         // MOVE METHOD //
         
@@ -157,7 +195,7 @@ namespace Jump
             pos -= movementspeed;
         }
 
-        public virtual async Task Move()
+        public virtual async Task Action()
         {
             double pos = Canvas.GetLeft(entity);
             while (pos > -30)
@@ -171,29 +209,21 @@ namespace Jump
                 ChangePositionMove(ref pos);
 
                 if (CheckHitPlayer()) return;
-                if (getHit) return;
-            }
-        }
-
-        public async Task BulletMove()
-        {
-            double pos = Canvas.GetLeft(entity);
-            while (pos > 0)
-            {
-                if (player!.IsDead) return;
-
-                TimeSpan move = TimeSpan.FromSeconds(0.05);
-                await Task.Delay(move);
-
-                ChangePositionMove(ref pos);
-
-                if (CheckHitPlayer())
+                if (getHit)
                 {
-                    playground!.Children.Remove(entity);
+                    if (IsSpawn)
+                    {
+                        playground!.Children.Remove(this.entity);
+                        main!.entities.Remove(this);
+                    }
                     return;
                 }
             }
-            playground!.Children.Remove(entity);
+            if (IsSpawn)
+            {
+                playground!.Children.Remove(this.entity);
+                main!.entities.Remove(this);
+            }
         }
     }
 }

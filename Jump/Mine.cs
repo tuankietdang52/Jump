@@ -44,7 +44,7 @@ namespace Jump
             SetEntity();
         }
 
-        public override async Task Move()
+        public override async Task Action()
         {
             double pos = Canvas.GetLeft(this.entity);
             while (pos > 0)
@@ -59,16 +59,19 @@ namespace Jump
 
                 if (CheckHitPlayer())
                 {
-                    Canvas.SetLeft(this.entity, pos);
-                    Canvas.SetTop(this.entity, top);
-                    Explode();
+                    if (!player!.IsDead) return;
+
+                    Explode(pos);
                     return;
                 }
             }
         }
 
-        public void Explode()
+        public void Explode(double pos)
         {
+            Canvas.SetLeft(this.entity, pos);
+            Canvas.SetTop(this.entity, top);
+
             string soundpath = pathsound + "explodesound.mp3";
             SetNewEntity(300, 300);
             Playsound(soundpath);

@@ -61,7 +61,7 @@ namespace Jump
             return hitbox;
         }
 
-        public override async Task Move()
+        public override async Task Action()
         {
             double pos = Canvas.GetLeft(this.entity);
             while (pos > -30)
@@ -81,6 +81,7 @@ namespace Jump
 
                 if (CheckHitPlayer())
                 {
+                    if (!player.IsDead) return;
                     player.IsVietCongKilled = true;
                     await RenderPicture();
                     return;
@@ -104,19 +105,19 @@ namespace Jump
             }
         }
 
-        public async void CreateEnemyBullet(double left)
+        public async void CreateKar98Bullet(double left)
         {
             string pathsoundeffect = pathsound + "kar98.mp3";
-            string bulletpath = pathpic + "kar98bullet.png";
 
-            EnemyBullet enemyBullet = new EnemyBullet(bulletpath!, player!, playground!, bulletspeed);
-            enemyBullet.SetBulletElement(10, 30, left, 250);
+            Kar98Bullet kar98bullet = new Kar98Bullet(left, player!, playground!, main!);
 
-            main!.entities.Add(enemyBullet);
-            playground!.Children.Add(enemyBullet.entity);
+            kar98bullet.movementspeed = bulletspeed;
+
+            main!.entities.Add(kar98bullet);
+            playground!.Children.Add(kar98bullet.entity);
 
             Playsound(pathsoundeffect);
-            await enemyBullet.BulletMove();
+            await kar98bullet.Action();
         }
 
         public void Showup(double pos)
@@ -126,7 +127,7 @@ namespace Jump
                 IsShoot = true;
 
                 SetNewEntity(177, 120);
-                CreateEnemyBullet(pos - 30);
+                CreateKar98Bullet(pos - 30);
             }
         }
 

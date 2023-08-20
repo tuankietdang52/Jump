@@ -34,16 +34,18 @@ namespace Jump
     public partial class MainWindow : Window
     {
         public int phase = 1;
-        public int score = 0;
-        public int timechange = 40;
+        public int mapindex = 1;
         public int changetime = 0;
+
+        public int timechange = 40;
+        public int limitchangetime = 8;
+
+        public int score = 0;
         public int hiscore;
         public int bulletAmount;
         public int bulletlimit;
         public int magazinebullet;
         public int magazinebulletlimit;
-        public int mapindex = 1;
-        public int limitchangetime = 5;
         public double volumeadjust = 0.2;
         public int money = 0;
 
@@ -57,10 +59,13 @@ namespace Jump
         public bool IsChangeMap = false;
         public bool NotChangeMap = false;
         public bool InShop = false;
+        public bool IsSpawnPirate = false;
+        public bool IsHaveBoss = false;
 
         private readonly string pathsave = $"{Directory.GetCurrentDirectory()}\\HiScore.txt";
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
+
         public string? backgroundpath;
         public string? undergroundpath;
         public string? themepath;
@@ -76,22 +81,15 @@ namespace Jump
         public Phase setphase = new Phase();
         public ListGun listgun = new ListGun();
         public Inventory item = new Inventory();
+        public Rectangle? armoricon;
         public MainWindow()
         {
             InitializeComponent();
 
             ChangeGameVisibility(Visibility.Hidden);
 
-            try
-            {
-                CreateGameDisplay();
-                MainMenu();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                this.Close();
-            }
+            CreateGameDisplay();
+            MainMenu();
         }
 
         private void ChangeGameVisibility(Visibility visibility)
@@ -200,17 +198,8 @@ namespace Jump
             setphase.main = (MainWindow)Main;
 
             RestartEntitySpeed();
-            ChangeMapName("Galaxy", Brushes.Purple);
 
-            try
-            {
-                GameStart();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                this.Close();
-            }
+            GameStart();
         }
 
         public void SetPlayer()
@@ -228,8 +217,7 @@ namespace Jump
 
         private void CreateGameDisplay()
         {
-            backgroundpath = pathpic + "galaxy.jpg";
-            undergroundpath = pathpic + "moon.png";
+            GetPathMapandTheme();
             ChangeBackground();
 
             theme.MediaEnded += Looptheme!;
@@ -300,12 +288,28 @@ namespace Jump
         {
             switch (mapindex)
             {
+                case 1:
+                    backgroundpath = pathpic + "galaxy.jpg";
+                    undergroundpath = pathpic + "moon.png";
+                    themepath = pathsound + "Luminous Memory.mp3";
+                    volumeadjust = 0.2;
+                    ChangeMapName("Galaxy", Brushes.Purple);
+                    return true;
+
                 case 2:
                     backgroundpath = pathpic + "jungle.jpg";
                     undergroundpath = pathpic + "dirt.jpg";
-                    themepath = pathsound + "Touhou 7 Stage 2.mp3";
+                    themepath = pathsound + "Touhou 7.2.mp3";
                     volumeadjust = 0.6;
                     ChangeMapName("Jungle", Brushes.LightGreen);
+                    return true;
+
+                case 3:
+                    backgroundpath = pathpic + "village.png";
+                    undergroundpath = pathpic + "villageground.png";
+                    themepath = pathsound + "The Village.mp3";
+                    volumeadjust = 0.8;
+                    ChangeMapName("Village", Brushes.Green);
                     return true;
 
                 default:
@@ -333,6 +337,9 @@ namespace Jump
             {
                 case Demon:
                     GetMoney(100);
+                    break;
+                case BigGoldFish:
+                    GetMoney(500); 
                     break;
                 case Bush:
                     if (!entity.IsHarmless) GetMoney(150);
@@ -384,6 +391,9 @@ namespace Jump
                 case Demon:
                     ScoreUp(4);
                     break;
+                case BigGoldFish:
+                    ScoreUp(10); 
+                    break;
                 case Bush:
                     if (!entity.IsHarmless) ScoreUp(3);
                     break;
@@ -407,7 +417,7 @@ namespace Jump
 
         // SOUND AND MUSIC //
 
-        private void PlayTheme(string path, double volume)
+        public void PlayTheme(string path, double volume)
         {
             theme.Open(new (path));
             theme.Volume = volume;
@@ -446,10 +456,7 @@ namespace Jump
             Main.KeyDown += KeyCommand;
             Main.KeyUp += ReleaseKey;
 
-
-            themepath = pathsound + "Luminous Memory.mp3";
-
-            PlayTheme(themepath, volumeadjust);
+            PlayTheme(themepath!, volumeadjust);
         }
 
         public async void GameStart()
@@ -484,6 +491,20 @@ namespace Jump
 
             while (!player.IsDead)
             {
+                if (InShop)
+                {
+                    try
+                    {
+                        ToShop();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                        this.Close();
+                    }
+                    return;
+                }
+
                 InShop = false;
 
                 if (bulletAmount <= 0)
@@ -497,11 +518,17 @@ namespace Jump
             
                 await Task.Delay(1);
 
+                if (IsHaveBoss)
+                {
+                    timetochangemov.Stop();
+                    continue;
+                }
+                
                 await setphase.ChangePhase();
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
             
-                if (elapsedtime >= 59)
+                if (elapsedtime >= timechange)
                 {
                     timetochangemov.Restart();
                     changetime++;
@@ -515,27 +542,25 @@ namespace Jump
             
                 if (changetime % 3 == 0 && changetime != 0)
                 {
-                    mapindex++;
-                    changetime++;
-            
-                    ClearEntity();
+                    if (IsHaveBoss) continue;
                     
-                    try
-                    {
-                        ToShop();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                        this.Close();
-                    }
-            
-                   return;
+                    ClearEntity();
+                    theme.Stop();
+
+                    await Task.Delay(2000);
+
+                    player.IsDead = false;
+                    player.setDefault();
+                    player.Default();
+
+                    IsHaveBoss = true;
+                    await setphase.ChangePhase();
+                    
                 }
 
             }
 
-                GameOver();
+            GameOver();
         }
 
         public void ChangeElementMap()
@@ -695,6 +720,7 @@ namespace Jump
             {
                 entity.soundplay.Stop();
                 Playground.Children.Remove(entity.entity);
+                if (entity.healthbar != null) Playground.Children.Remove(entity.healthbar);
             }
 
             entities.Clear();
@@ -750,6 +776,8 @@ namespace Jump
             IsBreakHiScore = false;
             IsChangeMap = false;
             NotChangeMap = false;
+            IsHaveBoss = false;
+            setphase.AlreadyHaveBoss = false;
         }
 
         public void RestartNumberElement()
@@ -777,6 +805,27 @@ namespace Jump
             GameStart();
         }
 
+        // BOSS //
+
+        public void CheckBoss(Entity entity)
+        {
+            if (!entity.IsDead) return;
+
+            IsHaveBoss = false;
+            setphase.AlreadyHaveBoss = false;
+            BossIsDefeated();
+        }
+
+        public void BossIsDefeated()
+        {
+            mapindex++;
+            changetime++;
+
+            InShop = true;
+
+            ClearEntity();
+        }
+
         // ENTITY //
 
         public async Task SpawnEntity(int phase, Entity newentity)
@@ -792,7 +841,7 @@ namespace Jump
             Playground.Children.Add(entity.entity);
             entities.Add(entity);
 
-            await entity.Move();
+            await entity.Action();
 
             CheckEntity(entity);
         }
@@ -802,8 +851,10 @@ namespace Jump
             // entity get hit by bullet //
             if (entity.getHit)
             {
-                if (!player.IsDead)
+                if (!entity.CheckGetHit()) { }
+                else
                 {
+                    if (IsHaveBoss) CheckBoss(entity);
                     ScoreUpType(entity);
                     GetMoneyType(entity);
                     Playground.Children.Remove(entity.entity);
@@ -897,7 +948,15 @@ namespace Jump
             UnregisterName(armoricon.Name);
 
             Playground.Children.Remove(armoricon);
+        }
 
+        public void ArmorVisibility(Visibility visibility)
+        {
+            if (!player.IsHaveArmor) return;
+
+            Rectangle armoricon = (Rectangle)Playground.FindName("ArmorIcon");
+
+            armoricon.Visibility = visibility;
         }
 
         // KEY COMMAND //
@@ -1103,6 +1162,7 @@ namespace Jump
             Main.KeyUp += ReleaseKey;
 
             ChangeGameVisibility(Visibility.Visible);
+            ArmorVisibility(Visibility.Visible);
 
             player.crouch = false;
             player.setDefault();
@@ -1111,6 +1171,7 @@ namespace Jump
 
             try
             {
+                InShop = false;
                 GameStart();
             }
             catch (Exception ex)
@@ -1176,6 +1237,7 @@ namespace Jump
 
             player.playershape.Visibility = Visibility.Hidden;
             ChangeGameVisibility(Visibility.Hidden);
+            ArmorVisibility(Visibility.Hidden);
 
             backgroundpath = pathpic + "shopshiba.jpg";
             await BlackScreenChanging();
