@@ -115,7 +115,20 @@ namespace Jump
         {
             if (HitPlayer())
             {
+                if (CheckArmor()) return true;
+
                 player!.IsDead = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool CheckArmor()
+        {
+            if (player!.IsHaveArmor)
+            {
+                player.IsHaveArmor = false;
+                main!.BreakArmor();
                 return true;
             }
             return false;

@@ -26,7 +26,8 @@ namespace Jump
         {
             Random spawn = new Random();
             int spawnindex = spawn.Next(200);
-            SpawnMag(spawnindex);
+
+            SpawnItem(spawnindex);
 
             if (phase > limitphase) phase = limitphase;
 
@@ -51,9 +52,15 @@ namespace Jump
         }
 
 
-        public void SpawnMag(int spawnindex)
+        public void SpawnItem(int spawnindex)
         {
-            if (spawnindex % 50 == 0) main!.SpawnMag();
+            if (spawnindex % 50 != 0) return;
+
+            Random itemrand = new Random();
+            int itemindex = itemrand.Next(0, 2);
+
+            if (itemindex == 0) main!.SpawnMag();
+            else main!.SpawnArmor();
         }
 
         public async void Phase1(int spawnindex)

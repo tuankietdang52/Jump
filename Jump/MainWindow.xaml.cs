@@ -495,13 +495,13 @@ namespace Jump
                 setphase.phase = phase;
                 timetochangemov.Start();
             
-               //await Task.Delay(1);
+                await Task.Delay(1);
 
                 await setphase.ChangePhase();
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
             
-                if (elapsedtime >= timechange)
+                if (elapsedtime >= 59)
                 {
                     timetochangemov.Restart();
                     changetime++;
@@ -706,6 +706,7 @@ namespace Jump
 
             player.IsDead = false;
             player.IsVietCongKilled = false;
+            player.IsHaveArmor = false;
 
             player.indexgun = 0;
 
@@ -798,6 +799,7 @@ namespace Jump
 
         private void CheckEntity(Entity entity)
         {
+            // entity get hit by bullet //
             if (entity.getHit)
             {
                 if (!player.IsDead)
@@ -809,11 +811,13 @@ namespace Jump
             }
             else
             {
+                // player avoid //
                 if (!player.IsDead && !InShop)
                 {
                     Playground.Children.Remove(entity.entity);
                     if (!entity.IsHarmless) ScoreUp(1);
                 }
+                // player get hit //
                 else
                 {
                     killer = entity;
@@ -843,7 +847,7 @@ namespace Jump
         public async void SpawnMag()
         {
             Magazine mag = new Magazine();
-            mag.player = player;
+            mag.player = this.player;
 
             Playground.Children.Add(mag.item);
 
@@ -859,6 +863,42 @@ namespace Jump
             Playground.Children.Remove(mag.item);
         }
 
+            // ARMOR //
+
+        public async void SpawnArmor()
+        {
+            Armor armor = new Armor();
+            armor.player = this.player;
+            armor.playground = Playground;
+
+            Playground.Children.Add(armor.item);
+
+            await armor.Move();
+
+            if (armor.IsTaken)
+            {
+                if (!player.IsHaveArmor)
+                {
+                    armor.ShowArmor();
+                }
+                player.IsHaveArmor = true;
+            }
+
+            Playground.Children.Remove(armor.item);
+        }
+
+        public void BreakArmor()
+        {
+            player.IsDead = false;
+            player.IsHaveArmor = false;
+
+            Rectangle armoricon = (Rectangle)Playground.FindName("ArmorIcon");
+
+            UnregisterName(armoricon.Name);
+
+            Playground.Children.Remove(armoricon);
+
+        }
 
         // KEY COMMAND //
 

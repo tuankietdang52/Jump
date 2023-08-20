@@ -85,6 +85,8 @@ namespace Jump
 
         public bool HitPlayer()
         {
+            if (player!.IsDead) return false;
+
             var playershape = player!.playershape;
             var playerleft = Canvas.GetLeft(playershape);
             var playertop = Canvas.GetTop(playershape);
