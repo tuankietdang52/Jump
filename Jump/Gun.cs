@@ -44,9 +44,11 @@ namespace Jump
             {
                 case "de":
                     getPathGun(0);
+                    player!.damage = 50;
                     break;
                 case "m4a4":
                     getPathGun(1);
+                    player!.damage = 40;
                     break;
                 default:
                     return;

@@ -91,7 +91,11 @@ namespace Jump
                 if (player!.IsDead) return;
 
                 await Task.Delay(1);
-                if (getHit) break;
+                if (getHit)
+                {
+                    IsDead = true;
+                    break;
+                }
 
                 if (timetodash.Elapsed.Seconds == 1)
                 {

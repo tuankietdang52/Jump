@@ -280,12 +280,38 @@ namespace Jump
 
         public void ChangeMapName(string mapname, SolidColorBrush color)
         {
-            Map.Text = "Map: " + mapname;
+            Map.Text = mapname;
             Map.Foreground = color;
+        }
+
+        public bool GetBossMapandTheme()
+        {
+            switch (mapindex)
+            {
+                case 1:
+                    backgroundpath = pathpic + "bossmap1.jpg";
+                    undergroundpath = pathpic + "luxury.png";
+                    themepath = pathsound + "Abstruse Dilemma.mp3";
+                    volumeadjust = 0.2;
+                    ChangeMapName("BOSS: GoldFish King", Brushes.Yellow);
+                    return true;
+
+                default:
+                    return false;
+            }
         }
 
         public bool GetPathMapandTheme()
         {
+            if (changetime % 3 == 0 && changetime != 0)
+            {
+                if (GetBossMapandTheme()) return true;
+
+                phase++;
+
+                return false;
+            }
+
             switch (mapindex)
             {
                 case 1:
@@ -293,7 +319,7 @@ namespace Jump
                     undergroundpath = pathpic + "moon.png";
                     themepath = pathsound + "Luminous Memory.mp3";
                     volumeadjust = 0.2;
-                    ChangeMapName("Galaxy", Brushes.Purple);
+                    ChangeMapName("Map: Galaxy", Brushes.Purple);
                     return true;
 
                 case 2:
@@ -301,7 +327,7 @@ namespace Jump
                     undergroundpath = pathpic + "dirt.jpg";
                     themepath = pathsound + "Touhou 7.2.mp3";
                     volumeadjust = 0.6;
-                    ChangeMapName("Jungle", Brushes.LightGreen);
+                    ChangeMapName("Map: Jungle", Brushes.LightGreen);
                     return true;
 
                 case 3:
@@ -309,7 +335,7 @@ namespace Jump
                     undergroundpath = pathpic + "villageground.png";
                     themepath = pathsound + "The Village.mp3";
                     volumeadjust = 0.8;
-                    ChangeMapName("Village", Brushes.Green);
+                    ChangeMapName("Map: Village", Brushes.Green);
                     return true;
 
                 default:
@@ -464,7 +490,7 @@ namespace Jump
             if (IsReplay)
             {
                 DeleteReplayElement();
-                ChangeMapName("Galaxy", Brushes.Purple);
+                ChangeMapName("Map: Galaxy", Brushes.Purple);
             }
 
             VoiceStart();
@@ -472,6 +498,8 @@ namespace Jump
             player.setDefault();
             player.Default();
             await Task.Delay(2000);
+
+            PlayTheme(themepath!, volumeadjust);
             
             if (!IsChangeMap) FirstStartGame();
             else ChangeElementMap();
@@ -493,15 +521,7 @@ namespace Jump
             {
                 if (InShop)
                 {
-                    try
-                    {
-                        ToShop();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                        this.Close();
-                    }
+                    ToShop();
                     return;
                 }
 
@@ -517,6 +537,8 @@ namespace Jump
                 timetochangemov.Start();
             
                 await Task.Delay(1);
+
+                await SpawnItem();
 
                 if (IsHaveBoss)
                 {
@@ -547,7 +569,11 @@ namespace Jump
                     ClearEntity();
                     theme.Stop();
 
+                    await ChangeMap();
+
                     await Task.Delay(2000);
+
+                    PlayTheme(themepath!, volumeadjust);
 
                     player.IsDead = false;
                     player.setDefault();
@@ -883,6 +909,20 @@ namespace Jump
 
             // BULLET AND MAGAZINE //
 
+        public async Task SpawnItem()
+        {
+            Random spawn = new Random();
+            int spawnindex = spawn.Next(0, 201);
+
+            if (spawnindex % setphase.itemchance != 0) return;
+
+            Random itemrand = new Random();
+            int itemindex = itemrand.Next(0, 2);
+
+            if (itemindex == 0) await SpawnMag();
+            else await SpawnArmor();
+        }
+
         public void getAmountBullet()
         {
             gun.getBullet(player.indexgun, ref bulletlimit, ref magazinebulletlimit);
@@ -895,7 +935,7 @@ namespace Jump
             BulletAmount.Text = "Bullet: " + bulletAmount + "/" + magazinebullet;
         }
 
-        public async void SpawnMag()
+        public async Task SpawnMag()
         {
             Magazine mag = new Magazine();
             mag.player = this.player;
@@ -916,7 +956,7 @@ namespace Jump
 
             // ARMOR //
 
-        public async void SpawnArmor()
+        public async Task SpawnArmor()
         {
             Armor armor = new Armor();
             armor.player = this.player;

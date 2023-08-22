@@ -44,5 +44,31 @@ namespace Jump
             Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
             return hitbox;
         }
+
+        public async Task SpawnAction(Entity boss)
+        {
+            Canvas.SetLeft(this.entity, 800);
+            double pos = Canvas.GetLeft(entity);
+            while (pos > -30)
+            {
+                if (player!.IsDead) return;
+                if (boss.IsDead) IsDead = true;
+
+                TimeSpan move = TimeSpan.FromSeconds(0.05);
+                await Task.Delay(move);
+
+                ChangePositionMove(ref pos);
+
+                if (getHit)
+                {
+                    playground!.Children.Remove(this.entity);
+                    main!.entities.Remove(this);
+                    break;
+                }
+                if (CheckHitPlayer()) break;
+            }
+            playground!.Children.Remove(this.entity);
+            main!.entities.Remove(this);
+        }
     }
 }

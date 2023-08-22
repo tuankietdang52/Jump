@@ -28,6 +28,10 @@ namespace Jump
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
         
         public Rectangle biggoldfish = new Rectangle();
+        public Random actionrand = new Random();
+
+        public double armor = 20;
+
         public bool IsRotate = false;
         public bool IsSpawnGoldFish = true;
         public bool AlreadyRotate = false;
@@ -45,7 +49,7 @@ namespace Jump
 
             movementspeed = 100;
 
-            pathimgentity = pathpic + "goldfish.png";
+            pathimgentity = pathpic + "goldfishking.png";
 
             entity = biggoldfish;
 
@@ -92,21 +96,34 @@ namespace Jump
             IsSpawnGoldFish = false;
         }
 
+        public double GetDamage()
+        {
+            double damage = player!.damage -  (player!.damage * (armor / 100));
+            if (damage >= healthbar!.Width)
+            {
+                damage = healthbar!.Width;
+            }
+            return damage;
+        }
+
+        public void Dead()
+        {
+            getHit = true;
+            IsDead = true;
+            main!.ClearEntity();
+            player!.IsDead = false;
+            playground!.Children.Remove(healthbar);
+        }
+
         public override async Task Action()
         {
             CreateHealthBar(700);
 
             double pos = Canvas.GetLeft(this.entity);
-            Random actionrand = new Random();
 
             Stopwatch skilltime = new Stopwatch();
 
             skilltime.Start();
-
-            await Task.Delay(1000);
-
-            string theme = pathsound + "unwelcome school.mp3";
-            main!.PlayTheme(theme, 0.1);
 
             while (!IsDead)
             {
@@ -114,13 +131,12 @@ namespace Jump
 
                 if (getHit)
                 {
-                    healthbar!.Width -= 70;
+                    healthbar!.Width -= GetDamage();
                     getHit = false;
                     if (healthbar.Width <= 0)
                     {
-                        getHit = true;
-                        IsDead = true;
-                        playground!.Children.Remove(healthbar);
+                        Dead();
+                        return;
                     }
                 }
 
@@ -131,8 +147,7 @@ namespace Jump
                 if (skilltime.Elapsed.Seconds == 1)
                 {
                     skilltime.Restart();
-                    actionindex = actionrand.Next(0, 11);
-                    getSkill(actionindex);
+                    GetRandomSkill();
                 }
                 else continue;
 
@@ -142,22 +157,31 @@ namespace Jump
             }
         }
 
-        public async void SpawnGoldFish(double left)
+        public void GetRandomSkill()
         {
-            GoldFish goldfish = new GoldFish();
+            actionindex = actionrand.Next(0, 11);
+            getSkill(actionindex);
+        }
 
+        public void SetGoldFish(ref GoldFish goldfish)
+        {
             goldfish.movementspeed = 50;
 
             goldfish.player = this.player;
             goldfish.playground = this.playground;
             goldfish.main = this.main;
+        }
 
-            goldfish.IsSpawn = true;
+        public async void SpawnGoldFish(double left)
+        {
+            GoldFish goldfish = new GoldFish();
+
+            SetGoldFish(ref goldfish);
 
             main!.entities.Add(goldfish);
             playground!.Children.Add(goldfish.entity);
 
-            await goldfish.Action();
+            await goldfish.SpawnAction(this);
             IsSpawnGoldFish = false;
         }
 

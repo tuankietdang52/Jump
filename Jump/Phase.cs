@@ -16,7 +16,7 @@ namespace Jump
 
         public bool AlreadyHaveBoss = false;
 
-
+        public int itemchance = 50;
         public int phase { get; set; }
         public int speedfish { get; set; }
         public int speeddemon { get; set; }
@@ -31,16 +31,17 @@ namespace Jump
             Random spawn = new Random();
             int spawnindex = spawn.Next(200);
 
-            SpawnItem(spawnindex);
-
             if (phase > limitphase) phase = limitphase;
 
-            if (main!.changetime % 3 == 0)
+            if (main!.changetime % 3 == 0 && main!.changetime != 0)
             {
+                itemchance = 100;
                 SpawnBoss();
                 await Task.Delay(1000);
                 return;
             }
+
+            itemchance = 50;
 
             switch (phase)
             {
@@ -94,18 +95,6 @@ namespace Jump
 
             }
             else return;
-        }
-
-
-        public void SpawnItem(int spawnindex)
-        {
-            if (spawnindex % 50 != 0) return;
-
-            Random itemrand = new Random();
-            int itemindex = itemrand.Next(0, 2);
-
-            if (itemindex == 0) main!.SpawnMag();
-            else main!.SpawnArmor();
         }
 
         public async void Phase1(int spawnindex)

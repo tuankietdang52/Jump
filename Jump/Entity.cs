@@ -53,7 +53,6 @@ namespace Jump
         public bool IsHarmless = false;
         public bool IsBullet = false;
         public bool IsDead = false;
-        public bool IsSpawn = false;
 
         public int turn = 0;
         public int bulletspeed = 100;
@@ -143,6 +142,7 @@ namespace Jump
             if (HitPlayer())
             {
                 if (CheckArmor()) return true;
+                if (IsDead) return true;
 
                 player!.IsDead = true;
                 return true;
@@ -170,7 +170,10 @@ namespace Jump
             player.playerhitbox = new Rect(playerleft , playertop, playershape.Width - 50, playershape.Height);
             entityhitbox = getHitbox();
 
-            if (player.playerhitbox.IntersectsWith(entityhitbox)) return true;
+            if (player.playerhitbox.IntersectsWith(entityhitbox))
+            {
+                return true;
+            }
 
             return false;
         }
@@ -208,21 +211,12 @@ namespace Jump
 
                 ChangePositionMove(ref pos);
 
-                if (CheckHitPlayer()) return;
                 if (getHit)
                 {
-                    if (IsSpawn)
-                    {
-                        playground!.Children.Remove(this.entity);
-                        main!.entities.Remove(this);
-                    }
+                    IsDead = true;
                     return;
                 }
-            }
-            if (IsSpawn)
-            {
-                playground!.Children.Remove(this.entity);
-                main!.entities.Remove(this);
+                if (CheckHitPlayer()) return;
             }
         }
     }

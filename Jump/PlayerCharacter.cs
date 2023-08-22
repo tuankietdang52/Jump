@@ -36,6 +36,7 @@ namespace Jump
         public Rect playerhitbox;
 
         public int indexgun = 0;
+        public double damage;
 
         public bool IsVietCongKilled = false;
         public bool IsDefaultDead = false;

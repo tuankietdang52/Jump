@@ -79,6 +79,13 @@ namespace Jump
                 if (pos <= 500) GetDown(pos);
                 else if (pos <= 800) Showup(pos);
 
+                if (getHit)
+                {
+                    IsDead = true;
+                    soundplay.Stop();
+                    return;
+                }
+
                 if (CheckHitPlayer())
                 {
                     if (!player.IsDead) return;
@@ -87,11 +94,6 @@ namespace Jump
                     return;
                 }
 
-                if (getHit)
-                {
-                    soundplay.Stop();
-                    return;
-                }
             }
         }
 
