@@ -118,7 +118,7 @@ namespace Jump
             main!.entities.Add(kar98bullet);
             playground!.Children.Add(kar98bullet.entity);
 
-            Playsound(pathsoundeffect, 1);
+            Playsound(pathsoundeffect, 0.4);
             await kar98bullet.Action();
         }
 

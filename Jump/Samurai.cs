@@ -352,7 +352,7 @@ namespace Jump
                     break;
 
                 case 1:
-                    if (top <= 210) break;
+                    if (top <= 195) break;
 
                     if (CheckPlayer())
                     {

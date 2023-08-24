@@ -43,7 +43,7 @@ namespace Jump
 
         public override Rect getHitbox()
         {
-            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height - 5);
+            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 40, height - 5);
             return hitbox;
         }
 

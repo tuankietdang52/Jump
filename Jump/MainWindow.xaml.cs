@@ -28,6 +28,7 @@ using System.Reflection.Metadata;
 using System.Reflection;
 using System.Windows.Automation.Provider;
 using System.Security.Policy;
+using System.Windows.Media.Converters;
 
 namespace Jump
 {
@@ -60,6 +61,7 @@ namespace Jump
         public bool NotChangeMap = false;
         public bool InShop = false;
         public bool IsSpawnPirate = false;
+        public bool IsHaveAspotate = false;
         public bool IsHaveBoss = false;
 
         private readonly string pathsave = $"{Directory.GetCurrentDirectory()}\\HiScore.txt";
@@ -325,7 +327,7 @@ namespace Jump
                     backgroundpath = pathpic + "galaxy.jpg";
                     undergroundpath = pathpic + "moon.png";
                     themepath = pathsound + "Luminous Memory.mp3";
-                    volumeadjust = 0.2;
+                    volumeadjust = 0.1;
                     ChangeMapName("Map: Galaxy", Brushes.Purple);
                     return true;
 
@@ -333,7 +335,7 @@ namespace Jump
                     backgroundpath = pathpic + "jungle.jpg";
                     undergroundpath = pathpic + "dirt.jpg";
                     themepath = pathsound + "Touhou 7.2.mp3";
-                    volumeadjust = 0.6;
+                    volumeadjust = 0.3;
                     ChangeMapName("Map: Jungle", Brushes.LightGreen);
                     return true;
 
@@ -341,7 +343,7 @@ namespace Jump
                     backgroundpath = pathpic + "village.png";
                     undergroundpath = pathpic + "villageground.png";
                     themepath = pathsound + "The Village.mp3";
-                    volumeadjust = 0.8;
+                    volumeadjust = 0.4;
                     ChangeMapName("Map: Village", Brushes.Green);
                     return true;
 
@@ -875,7 +877,7 @@ namespace Jump
 
         // ENTITY //
 
-        public async Task SpawnEntity(int phase, Entity newentity)
+        public async Task SpawnEntity(Entity newentity)
         {
             Entity entity;
 

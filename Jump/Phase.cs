@@ -95,7 +95,7 @@ namespace Jump
 
                 AlreadyHaveBoss = true;
 
-                await main!.SpawnEntity(phase, newentity);
+                await main!.SpawnEntity(newentity);
 
             }
             else return;
@@ -109,7 +109,7 @@ namespace Jump
 
                 AlreadyHaveBoss = true;
 
-                await main!.SpawnEntity(phase, newentity);
+                await main!.SpawnEntity(newentity);
 
             }
             else return;
@@ -128,7 +128,7 @@ namespace Jump
             else return;
 
             changeentity.SetSpeedMap1(newentity, main!);
-            await main!.SpawnEntity(phase, newentity);
+            await main!.SpawnEntity(newentity);
 
         }
 
@@ -144,7 +144,7 @@ namespace Jump
             else return;
 
             changeentity.SetSpeedMap2(newentity, main!);
-            await main!.SpawnEntity(phase, newentity);
+            await main!.SpawnEntity(newentity);
         }
 
         public async void Phase3(int spawnindex)
@@ -152,14 +152,19 @@ namespace Jump
             if (spawnindex > entitychance) return;
 
             Random randenemy = new Random();
-            int enemyindex = randenemy.Next(2);
+            int enemyindex;
+            if (main!.changetime == 7) enemyindex = randenemy.Next(0, 2);
+            else enemyindex = randenemy.Next(0, 3);
 
-            if (main!.IsSpawnPirate && enemyindex == 0) return;
+            if (main!.IsSpawnPirate && enemyindex == 1) return;
+            if (main!.IsHaveAspotate && enemyindex == 2) return;
+            Entity newentity;
 
-            Entity newentity = changeentity.ChangeEntityMap3(enemyindex);
+            if (!main!.IsHaveBoss) newentity = changeentity.ChangeEntityMap3(enemyindex);
+            else return;
 
             changeentity.SetSpeedMap3(newentity, main!);
-            await main!.SpawnEntity(phase, newentity);
+            await main!.SpawnEntity(newentity);
         }
     }
 }

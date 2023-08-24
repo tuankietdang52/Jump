@@ -102,10 +102,12 @@ namespace Jump
             {
                 case 7:
                     entity.bulletspeed = 30;
+                    main.timechange = 40;
                     return;
 
                 case 8:
                     entity.bulletspeed = 30;
+                    main.timechange = 59;
                     return;
 
                 default:
@@ -173,13 +175,18 @@ namespace Jump
             switch (enemyindex)
             {
                 case 0:
+                    Warrior warrior = new Warrior();
+                    newentity = warrior;
+                    break;
+
+                case 1:
                     PirateCaptain piratecap = new PirateCaptain();
                     newentity = piratecap;
                     break;
 
-                case 1:
-                    Warrior warrior = new Warrior();
-                    newentity = warrior;
+                case 2:
+                    Apostate apostate = new Apostate();
+                    newentity = apostate;
                     break;
 
                 default:

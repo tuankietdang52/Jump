@@ -31,7 +31,11 @@ namespace Jump
         public Rectangle? dash;
 
         public bool IsDash = false;
+        public bool IsBuff = false;
         public string? slashsound;
+
+        public int basehealth = 1;
+        public int hittime = 0;
 
         public Warrior()
         {
@@ -79,23 +83,54 @@ namespace Jump
             playground!.Children.Add(dash);
         }
 
+        public void SetHealth(ref int health)
+        {
+            if (main!.IsHaveAspotate && !IsBuff)
+            {
+                IsBuff = true;
+                health *= 2;
+            }
+            else if (!main.IsHaveAspotate)
+            {
+                IsBuff = false;
+                health = basehealth;
+            }
+        }
+
+        public bool DeadCheck(int health)
+        {
+            if (hittime >= health)
+            {
+                getHit = true;
+                IsDead = true;
+                return true;
+            }
+            else if (getHit)
+            {
+                getHit = false;
+                hittime++;
+            }
+            return false;
+        }
+
         public override async Task Action()
         {
             double pos = Canvas.GetLeft(this.entity);
 
             Stopwatch timetodash = new Stopwatch();
 
+            int health = basehealth;
+
             timetodash.Start();
             while (pos > -30)
             {
-                if (player!.IsDead) return;
+                if (player!.IsDead) break;
+
+                SetHealth(ref health);
 
                 await Task.Delay(1);
-                if (getHit)
-                {
-                    IsDead = true;
-                    break;
-                }
+
+                if (DeadCheck(health)) return;
 
                 if (timetodash.Elapsed.Seconds == 1)
                 {
