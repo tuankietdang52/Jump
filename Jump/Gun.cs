@@ -48,7 +48,7 @@ namespace Jump
                     break;
                 case "m4a4":
                     getPathGun(1);
-                    player!.damage = 40;
+                    player!.damage = 30;
                     break;
                 default:
                     return;

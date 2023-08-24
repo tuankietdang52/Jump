@@ -32,8 +32,6 @@ namespace Jump
 
         public double armor = 20;
 
-        public bool IsRotate = false;
-        public bool IsSpawnGoldFish = true;
         public bool AlreadyRotate = false;
 
         public int actionindex;
@@ -59,15 +57,13 @@ namespace Jump
         public override Rect getHitbox()
         {
             Rect hitbox;
-            if (!IsRotate) hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), entity!.Width - 30, entity.Height);
+            if (!AlreadyRotate) hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), entity!.Width - 30, entity.Height);
             else hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity) - 150, entity!.Width, entity.Height - 60);
             return hitbox;
         }
 
         public void setDefault()
         {
-            IsRotate = false;
-            IsSpawnGoldFish = false;
             AlreadyRotate = false;
 
             entity!.Height = 300;
@@ -77,23 +73,26 @@ namespace Jump
             Canvas.SetTop(entity, 60);
         }
 
-        public void getSkill(int actionindex)
+        public async void UseSkill(int actionindex, double pos)
         {
             switch (actionindex)
             {
                 case 0: case 1: case 2: case 3:
-                    break;
+                    await Task.Delay(1);
+                    return;
+
                 case 4: case 5: case 6: case 7: case 8:
-                    IsRotate = true;
+                    if (!AlreadyRotate) await Rotate();
                     return;
+
                 case 9: case 10:
-                    IsSpawnGoldFish = true;
+                    SpawnGoldFish(pos);
                     return;
+
                 default:
+                    await Task.Delay(1);
                     return;
             }
-            IsRotate = false;
-            IsSpawnGoldFish = false;
         }
 
         public double GetDamage()
@@ -147,20 +146,16 @@ namespace Jump
                 if (skilltime.Elapsed.Seconds == 1)
                 {
                     skilltime.Restart();
-                    GetRandomSkill();
+                    GetRandomSkill(pos);
                 }
                 else continue;
-
-                if (IsRotate && !AlreadyRotate) await Rotate();
-
-                if (IsSpawnGoldFish) SpawnGoldFish(pos);
             }
         }
 
-        public void GetRandomSkill()
+        public void GetRandomSkill(double pos)
         {
             actionindex = actionrand.Next(0, 11);
-            getSkill(actionindex);
+            UseSkill(actionindex, pos);
         }
 
         public void SetGoldFish(ref GoldFish goldfish)
@@ -182,7 +177,6 @@ namespace Jump
             playground!.Children.Add(goldfish.entity);
 
             await goldfish.SpawnAction(this);
-            IsSpawnGoldFish = false;
         }
 
         public async Task Push()

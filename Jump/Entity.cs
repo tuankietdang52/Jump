@@ -57,7 +57,10 @@ namespace Jump
         public int turn = 0;
         public int bulletspeed = 100;
 
-        public Entity() { }
+        public Entity()
+        {
+            soundplay.MediaEnded += SoundEnd!;
+        }
 
         // SET ENTITY DISPLAY //
 
@@ -75,7 +78,7 @@ namespace Jump
             Canvas.SetTop(entity, top);
         }
 
-        public void SetNewEntity(int newheight, int newwidth)
+        public void SetNewEntity(double newheight, double newwidth)
         {
             entity!.Height = newheight;
             entity!.Width = newwidth;
@@ -116,6 +119,9 @@ namespace Jump
             playground!.Children.Add(healthbar);
         }
 
+
+        public virtual void SoundEnd(object sender, EventArgs e) { }
+
         public virtual void DemonTurn() { }
 
         // GET SET //
@@ -127,10 +133,10 @@ namespace Jump
         
         // SOUND EFFECT //
 
-        public void Playsound(string path)
+        public void Playsound(string path, double volumeadjust)
         {
             soundplay.Open(new (path));
-            soundplay.Volume = 1;
+            soundplay.Volume = volumeadjust;
             soundplay.Play();
         }
 

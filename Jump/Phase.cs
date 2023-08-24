@@ -35,7 +35,6 @@ namespace Jump
 
             if (main!.changetime % 3 == 0 && main!.changetime != 0)
             {
-                itemchance = 100;
                 SpawnBoss();
                 await Task.Delay(1000);
                 return;
@@ -76,6 +75,11 @@ namespace Jump
                 case 1:
                     Boss1();
                     return;
+
+                case 2:
+                    Boss2();
+                    return;
+
                 default:
                     main!.IsHaveBoss = false;
                     main!.BossIsDefeated();
@@ -88,6 +92,20 @@ namespace Jump
             if (!AlreadyHaveBoss && main!.IsHaveBoss)
             {
                 Entity newentity = changeentity.ChangeEntityMap1(2);
+
+                AlreadyHaveBoss = true;
+
+                await main!.SpawnEntity(phase, newentity);
+
+            }
+            else return;
+        }
+
+        public async void Boss2()
+        {
+            if (!AlreadyHaveBoss && main!.IsHaveBoss)
+            {
+                Entity newentity = changeentity.ChangeEntityMap2(2);
 
                 AlreadyHaveBoss = true;
 
@@ -120,7 +138,11 @@ namespace Jump
 
             Random randenemy = new Random();
             int enemyindex = randenemy.Next(2);
-            Entity newentity = changeentity.ChangeEntityMap2(enemyindex);
+            Entity newentity;
+
+            if (!main!.IsHaveBoss) newentity = changeentity.ChangeEntityMap2(enemyindex);
+            else return;
+
             changeentity.SetSpeedMap2(newentity, main!);
             await main!.SpawnEntity(phase, newentity);
         }

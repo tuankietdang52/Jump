@@ -103,7 +103,7 @@ namespace Jump
                 }
                 if (timetodash.Elapsed.Seconds < 2) continue;
 
-                Playsound(slashsound!);
+                Playsound(slashsound!, 1);
                 pathimgentity = pathpic + "warriorslash.png";
                 SetEntity();
 

@@ -33,11 +33,11 @@ namespace Jump
 {
     public partial class MainWindow : Window
     {
-        public int phase = 1;
-        public int mapindex = 1;
-        public int changetime = 0;
+        public int phase = 3;
+        public int mapindex = 3;
+        public int changetime = 7;
 
-        public int timechange = 40;
+        public int timechange = 30;
         public int limitchangetime = 8;
 
         public int score = 0;
@@ -79,7 +79,6 @@ namespace Jump
         public Gun gun = new Gun();
         public List<Entity> entities = new List<Entity>();
         public Phase setphase = new Phase();
-        public ListGun listgun = new ListGun();
         public Inventory item = new Inventory();
         public Rectangle? armoricon;
         public MainWindow()
@@ -106,7 +105,7 @@ namespace Jump
 
         public void MainMenu()
         {
-            string pathmainmenu = pathsound + "Melody of Guidance.mp3";
+            string pathmainmenu = pathsound + "Main Theme.mp3";
 
             PlayTheme(pathmainmenu, 1);
 
@@ -292,8 +291,16 @@ namespace Jump
                     backgroundpath = pathpic + "bossmap1.jpg";
                     undergroundpath = pathpic + "luxury.png";
                     themepath = pathsound + "Abstruse Dilemma.mp3";
-                    volumeadjust = 0.2;
+                    volumeadjust = 0.1;
                     ChangeMapName("BOSS: GoldFish King", Brushes.Yellow);
+                    return true;
+
+                case 2:
+                    backgroundpath = pathpic + "bossmap2.jpg";
+                    undergroundpath = pathpic + "shrine.png";
+                    themepath = pathsound + "Cloud Heaven.mp3";
+                    volumeadjust = 0.2;
+                    ChangeMapName("BOSS: Shogun", Brushes.Red);
                     return true;
 
                 default:
@@ -365,10 +372,16 @@ namespace Jump
                     GetMoney(100);
                     break;
                 case BigGoldFish:
-                    GetMoney(500); 
+                    GetMoney(1000); 
                     break;
                 case Bush:
                     if (!entity.IsHarmless) GetMoney(150);
+                    break;
+                case Samurai:
+                    GetMoney(2000);
+                    break;
+                case PirateCaptain:
+                    GetMoney(200);
                     break;
                 default:
                     GetMoney(50);
@@ -422,6 +435,12 @@ namespace Jump
                     break;
                 case Bush:
                     if (!entity.IsHarmless) ScoreUp(3);
+                    break;
+                case Samurai:
+                    ScoreUp(20);
+                    break;
+                case PirateCaptain:
+                    ScoreUp(5);
                     break;
                 default:
                     ScoreUp(2); 
@@ -538,15 +557,14 @@ namespace Jump
             
                 await Task.Delay(1);
 
-                await SpawnItem();
+                if (timetochangemov.Elapsed.Seconds % 5 == 0) await SpawnItem();
 
-                if (IsHaveBoss)
+                if (IsHaveBoss) continue;
+
+                if (changetime % 3 != 0 || changetime == 0)
                 {
-                    timetochangemov.Stop();
-                    continue;
+                    await setphase.ChangePhase();
                 }
-                
-                await setphase.ChangePhase();
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
             
@@ -575,13 +593,12 @@ namespace Jump
 
                     PlayTheme(themepath!, volumeadjust);
 
-                    player.IsDead = false;
-                    player.setDefault();
-                    player.Default();
-
                     IsHaveBoss = true;
+
+                    player.IsDead = false;
+                    RestartPlayer();
+
                     await setphase.ChangePhase();
-                    
                 }
 
             }
@@ -756,17 +773,20 @@ namespace Jump
         {
             player.setDefault();
 
+            if (player.IsDead) player.IsHaveArmor = false;
             player.IsDead = false;
             player.IsVietCongKilled = false;
-            player.IsHaveArmor = false;
 
+            player.Default();
+        }
+
+        public void RestartInventory()
+        {
             player.indexgun = 0;
 
             player.inventory.Clear();
             player.inventory.Add("de");
             gun.getPathGun(player.indexgun);
-
-            player.Default();
         }
 
         public void RestartElement()
@@ -783,6 +803,7 @@ namespace Jump
 
             ClearEntity();
             RestartPlayer();
+            RestartInventory();
 
             getAmountBullet();
             AmountBullet();
@@ -915,12 +936,12 @@ namespace Jump
             int spawnindex = spawn.Next(0, 201);
 
             if (spawnindex % setphase.itemchance != 0) return;
-
+            
             Random itemrand = new Random();
-            int itemindex = itemrand.Next(0, 2);
+            int itemindex = itemrand.Next(0, 10);
 
-            if (itemindex == 0) await SpawnMag();
-            else await SpawnArmor();
+            if (itemindex <= 1) await SpawnMag();
+            else if (itemindex <= 4) await SpawnArmor();
         }
 
         public void getAmountBullet()
@@ -1270,6 +1291,7 @@ namespace Jump
         public async void ToShop()
         {
             InShop = true;
+            ClearEntity();
 
             if (player.IsDead) player.IsDead = false;
             Main.KeyDown -= KeyCommand;

@@ -74,7 +74,7 @@ namespace Jump
 
             string soundpath = pathsound + "explodesound.mp3";
             SetNewEntity(300, 300);
-            Playsound(soundpath);
+            Playsound(soundpath, 1);
         }
 
         public override Rect getHitbox()

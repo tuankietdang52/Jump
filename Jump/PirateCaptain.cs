@@ -38,7 +38,7 @@ namespace Jump
 
             pathimgentity = pathpic + "piratecaptain.png";
 
-            left = 880;
+            left = 740;
             top = 195;
 
             entity = piratecap;
@@ -89,7 +89,7 @@ namespace Jump
             main!.entities.Add(cannonball);
             playground!.Children.Add(cannonball.entity);
 
-            Playsound(pathsoundeffect);
+            Playsound(pathsoundeffect, 1);
             await cannonball.Action();
         }
 

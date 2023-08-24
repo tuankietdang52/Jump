@@ -42,6 +42,7 @@ namespace Jump
                         return;
                     }
                     entity.movementspeed = 60;
+                    main.timechange = 60;
                     return;
 
                 default:
@@ -67,6 +68,17 @@ namespace Jump
                     return;
 
                 case 5:
+                    if (entity is Mine)
+                    {
+                        entity.movementspeed = 70;
+                        return;
+                    }
+                    entity.movementspeed = 50;
+                    entity.bulletspeed = 90;
+                    main.timechange = 30;
+                    return;
+
+                case 6:
                     if (entity is Mine)
                     {
                         entity.movementspeed = 70;
@@ -142,6 +154,11 @@ namespace Jump
                 case 1:
                     Mine mine = new Mine();
                     newentity = mine;
+                    break;
+
+                case 2:
+                    Samurai samurai = new Samurai();
+                    newentity = samurai;
                     break;
 
                 default:

@@ -67,6 +67,7 @@ namespace Jump
                     return;
                 }
             }
+            main!.ScoreUp(1);
             main!.entities.Remove(this);
             playground!.Children.Remove(entity);
         }
@@ -79,7 +80,7 @@ namespace Jump
 
             SetNewEntity(200, 200);
             Canvas.SetLeft(this.entity, pos - 50);
-            Playsound(soundpath);
+            Playsound(soundpath, 1);
         }
     }
 }
