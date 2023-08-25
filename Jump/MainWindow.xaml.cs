@@ -179,7 +179,7 @@ namespace Jump
             Playground.Children.Add(start);
         }
 
-        private void PreStartGame(object sender, RoutedEventArgs e)
+        private async void PreStartGame(object sender, RoutedEventArgs e)
         {
             Rectangle title = (Rectangle)Playground.FindName("Title");
             Button start = (Button)Playground.FindName("Start");
@@ -192,7 +192,11 @@ namespace Jump
 
             theme.Stop();
 
+            GetPathMapandTheme();
+            await BlackScreenChanging();
+
             ChangeGameVisibility(Visibility.Visible);
+
 
             SetPlayer();
 
@@ -219,6 +223,7 @@ namespace Jump
         private void CreateGameDisplay()
         {
             GetPathMapandTheme();
+            backgroundpath = pathpic + "mainbackground.png";
             ChangeBackground();
 
             theme.MediaEnded += Looptheme!;
