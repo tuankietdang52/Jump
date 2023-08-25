@@ -67,20 +67,9 @@ namespace Jump
                     return;
                 }
             }
-            main!.ScoreUp(1);
+            if (!player!.IsDead) main!.ScoreUp(1);
             main!.entities.Remove(this);
             playground!.Children.Remove(entity);
-        }
-
-        public void Explode(double pos)
-        {
-            string soundpath = pathsound + "cannonexplodesound.mp3";
-
-            Canvas.SetTop(this.entity, top);
-
-            SetNewEntity(200, 200);
-            Canvas.SetLeft(this.entity, pos - 50);
-            Playsound(soundpath, 1);
         }
     }
 }

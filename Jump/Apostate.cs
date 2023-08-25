@@ -29,9 +29,6 @@ namespace Jump
 
         public Rectangle apostate = new Rectangle();
 
-        public int hittime = 0;
-        public int health = 2;
-
         public Apostate()
         {
             height = 204;
@@ -39,6 +36,8 @@ namespace Jump
 
             left = 830;
             top = 150;
+
+            basehealthmob = 2;
 
             newleft = left;
             newtop = top;
@@ -96,20 +95,12 @@ namespace Jump
             await main!.SpawnEntity(preventity);
         }
 
-        public bool DeadCheck(int health)
+        public void HandleSkill(double pos)
         {
-            if (hittime >= health)
-            {
-                getHit = true;
-                IsDead = true;
-                return true;
-            }
-            else if (getHit)
-            {
-                getHit = false;
-                hittime++;
-            }
-            return false;
+            SetNewEntity(204, 189);
+            Playsound(pathsound + "apostateskill.mp3", 100);
+
+            SpawnPrevEntity(pos);
         }
 
         public override async Task Action()
@@ -120,20 +111,19 @@ namespace Jump
             Stopwatch spawntime = new Stopwatch();
 
             spawntime.Start();
+            HandleSkill(pos);
             while (!IsDead)
             {
                 if (player!.IsDead) break;
                 await Task.Delay(1);
 
-                if (DeadCheck(health)) break;
+                if (CheckHitTime(basehealthmob)) break;
 
                 if (spawntime.Elapsed.Seconds == 3)
                 {
                     spawntime.Restart();
-                    SetNewEntity(204, 189);
-                    Playsound(pathsound + "apostateskill.mp3", 100);
 
-                    SpawnPrevEntity(pos);
+                    HandleSkill(pos);
 
                     await Task.Delay(1000);
                     SetEntity();

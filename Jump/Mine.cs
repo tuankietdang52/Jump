@@ -76,11 +76,5 @@ namespace Jump
             SetNewEntity(300, 300);
             Playsound(soundpath, 1);
         }
-
-        public override Rect getHitbox()
-        {
-            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
-            return hitbox;
-        }
     }
 }

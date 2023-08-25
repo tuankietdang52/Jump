@@ -58,7 +58,7 @@ namespace Jump
                     break;
 
                 case 3:
-                    entitychance = 100;
+                    entitychance = 150;
                     Phase3(spawnindex);
                     await Task.Delay(1000);
                     break;
@@ -154,7 +154,7 @@ namespace Jump
             Random randenemy = new Random();
             int enemyindex;
             if (main!.changetime == 7) enemyindex = randenemy.Next(0, 2);
-            else enemyindex = randenemy.Next(0, 3);
+            else enemyindex = randenemy.Next(0, 4);
 
             if (main!.IsSpawnPirate && enemyindex == 1) return;
             if (main!.IsHaveAspotate && enemyindex == 2) return;

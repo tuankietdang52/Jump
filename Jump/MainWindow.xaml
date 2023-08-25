@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Jump"
         mc:Ignorable="d"
-        Title="Parkour Pro" Height="650" Width="1000" x:Name="Main" Background="{x:Null}" Opacity="0">
+        Title="Parkour Pro" Height="650" Width="1000" x:Name="Main" Background="{x:Null}">
     <Viewbox Stretch="Fill">
         <Canvas Name="Playground" Background="#FF07EEFF" Width="1000" Height="650">
             <Rectangle HorizontalAlignment="Center" Height="310" Canvas.Left="0" Canvas.Top="346" Stroke="Black" VerticalAlignment="Top" Width="1002" Name="Ground"/>

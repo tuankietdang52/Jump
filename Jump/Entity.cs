@@ -53,9 +53,12 @@ namespace Jump
         public bool IsHarmless = false;
         public bool IsBullet = false;
         public bool IsDead = false;
+        public bool IsBuff = false;
 
         public int turn = 0;
         public int bulletspeed = 100;
+        public int hittime = 0;
+        public int basehealthmob { get; set; }
 
         public Entity()
         {
@@ -94,7 +97,8 @@ namespace Jump
 
         public virtual Rect getHitbox()
         {
-            return new Rect(0, 0, 0, 0);
+            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
+            return hitbox;
         }
 
         public void CreateHealthBar(double health)
@@ -119,10 +123,50 @@ namespace Jump
             playground!.Children.Add(healthbar);
         }
 
+        public bool CheckHitTime(int health)
+        {
+            if (hittime >= health)
+            {
+                getHit = true;
+                IsDead = true;
+                return true;
+            }
+            else if (getHit)
+            {
+                getHit = false;
+                hittime++;
+            }
+            return false;
+        }
+
+        public void SetHealth(ref int health)
+        {
+            if (main!.IsHaveAspotate && !IsBuff)
+            {
+                IsBuff = true;
+                health *= 2;
+            }
+            else if (!main.IsHaveAspotate)
+            {
+                IsBuff = false;
+                health = basehealthmob;
+            }
+        }
 
         public virtual void SoundEnd(object sender, EventArgs e) { }
 
         public virtual void DemonTurn() { }
+
+        public void Explode(double pos)
+        {
+            string soundpath = pathsound + "cannonexplodesound.mp3";
+
+            Canvas.SetTop(this.entity, top);
+
+            SetNewEntity(200, 200);
+            Canvas.SetLeft(this.entity, pos - 50);
+            Playsound(soundpath, 1);
+        }
 
         // GET SET //
 

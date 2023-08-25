@@ -101,11 +101,13 @@ namespace Jump
             switch (main.changetime)
             {
                 case 7:
+                    entity.movementspeed = 35;
                     entity.bulletspeed = 30;
                     main.timechange = 40;
                     return;
 
                 case 8:
+                    entity.movementspeed = 35;
                     entity.bulletspeed = 30;
                     main.timechange = 59;
                     return;
@@ -187,6 +189,11 @@ namespace Jump
                 case 2:
                     Apostate apostate = new Apostate();
                     newentity = apostate;
+                    break;
+
+                case 3:
+                    Kamikaze kamikaze = new Kamikaze();
+                    newentity = kamikaze;
                     break;
 
                 default:

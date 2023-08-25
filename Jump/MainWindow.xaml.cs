@@ -390,6 +390,12 @@ namespace Jump
                 case PirateCaptain:
                     GetMoney(200);
                     break;
+                case Apostate:
+                    GetMoney(100);
+                    break;
+                case Kamikaze:
+                    GetMoney(150);
+                    break;
                 default:
                     GetMoney(50);
                     break;
@@ -448,6 +454,12 @@ namespace Jump
                     break;
                 case PirateCaptain:
                     ScoreUp(5);
+                    break;
+                case Apostate:
+                    ScoreUp(4);
+                    break;
+                case Kamikaze:
+                    ScoreUp(3);
                     break;
                 default:
                     ScoreUp(2); 
@@ -564,7 +576,10 @@ namespace Jump
             
                 await Task.Delay(1);
 
-                if (timetochangemov.Elapsed.Seconds % 5 == 0) await SpawnItem();
+                if (timetochangemov.Elapsed.Seconds % 5 == 0)
+                {
+                    await SpawnItem();
+                }
 
                 if (IsHaveBoss) continue;
 
@@ -947,8 +962,8 @@ namespace Jump
             Random itemrand = new Random();
             int itemindex = itemrand.Next(0, 10);
 
-            if (itemindex <= 1) await SpawnMag();
-            else if (itemindex <= 4) await SpawnArmor();
+            if (itemindex <= 1 || phase != 3) await SpawnMag();
+            else if (itemindex <= 4 || phase != 3) await SpawnArmor();
         }
 
         public void getAmountBullet()

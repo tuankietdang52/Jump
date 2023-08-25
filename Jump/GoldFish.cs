@@ -39,12 +39,6 @@ namespace Jump
             SetEntity();
         }
 
-        public override Rect getHitbox()
-        {
-            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
-            return hitbox;
-        }
-
         public async Task SpawnAction(Entity boss)
         {
             Canvas.SetLeft(this.entity, 800);

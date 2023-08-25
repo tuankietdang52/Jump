@@ -31,11 +31,7 @@ namespace Jump
         public Rectangle? dash;
 
         public bool IsDash = false;
-        public bool IsBuff = false;
         public string? slashsound;
-
-        public int basehealth = 1;
-        public int hittime = 0;
 
         public Warrior()
         {
@@ -51,6 +47,8 @@ namespace Jump
             newleft = left;
             newtop = top;
 
+            basehealthmob = 1;
+
             slashsound = pathsound + "warriorslash.mp3";
             pathimgentity = pathpic + "warrior.png";
             newpathimg = pathpic + "warriorhold.png";
@@ -58,12 +56,6 @@ namespace Jump
             entity = warrior;
 
             SetEntity();
-        }
-
-        public override Rect getHitbox()
-        {
-            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
-            return hitbox;
         }
 
         public void CreateDashEffect(double pos)
@@ -83,43 +75,13 @@ namespace Jump
             playground!.Children.Add(dash);
         }
 
-        public void SetHealth(ref int health)
-        {
-            if (main!.IsHaveAspotate && !IsBuff)
-            {
-                IsBuff = true;
-                health *= 2;
-            }
-            else if (!main.IsHaveAspotate)
-            {
-                IsBuff = false;
-                health = basehealth;
-            }
-        }
-
-        public bool DeadCheck(int health)
-        {
-            if (hittime >= health)
-            {
-                getHit = true;
-                IsDead = true;
-                return true;
-            }
-            else if (getHit)
-            {
-                getHit = false;
-                hittime++;
-            }
-            return false;
-        }
-
         public override async Task Action()
         {
             double pos = Canvas.GetLeft(this.entity);
 
             Stopwatch timetodash = new Stopwatch();
 
-            int health = basehealth;
+            int health = basehealthmob;
 
             timetodash.Start();
             while (pos > -30)
@@ -130,7 +92,7 @@ namespace Jump
 
                 await Task.Delay(1);
 
-                if (DeadCheck(health)) return;
+                if (CheckHitTime(health)) break;
 
                 if (timetodash.Elapsed.Seconds == 1)
                 {
@@ -158,6 +120,7 @@ namespace Jump
                     return;
                 }
             }
+            if (!player!.IsDead && !IsDead) main!.ScoreUp(2);
             playground!.Children.Remove(dash);
         }
 

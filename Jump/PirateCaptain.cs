@@ -30,10 +30,7 @@ namespace Jump
 
         public Rectangle piratecap = new Rectangle();
 
-        public int hittime = 0;
         public int basehealth = 3;
-
-        public bool IsBuff = false;
 
         public PirateCaptain()
         {
@@ -45,39 +42,11 @@ namespace Jump
             left = 700;
             top = 195;
 
+            basehealthmob = 3;
+
             entity = piratecap;
 
             SetEntity();
-        }
-
-        public void SetHealth(ref int health)
-        {
-            if (main!.IsHaveAspotate && !IsBuff)
-            {
-                IsBuff = true;
-                health *= 2;
-            }
-            else if (!main.IsHaveAspotate)
-            {
-                IsBuff = false;
-                health = basehealth;
-            }
-        }
-
-        public bool DeadCheck(int health)
-        {
-            if (hittime >= health)
-            {
-                getHit = true;
-                IsDead = true;
-                return true;
-            }
-            else if (getHit)
-            {
-                getHit = false;
-                hittime++;
-            }
-            return false;
         }
 
         public override async Task Action()
@@ -96,7 +65,7 @@ namespace Jump
                 
                 SetHealth(ref health);
 
-                if (DeadCheck(health)) return;
+                if (CheckHitTime(health)) return;
 
                 await Task.Delay(1);
 
@@ -122,12 +91,6 @@ namespace Jump
 
             Playsound(pathsoundeffect, 1);
             await cannonball.Action();
-        }
-
-        public override Rect getHitbox()
-        {
-            Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
-            return hitbox;
         }
     }
 }
