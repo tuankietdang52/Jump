@@ -41,6 +41,7 @@ namespace Jump
         public int timechange = 30;
         public int limitchangetime = 8;
 
+        public int money = 20000;
         public int score = 0;
         public int hiscore;
         public int bulletAmount;
@@ -48,7 +49,6 @@ namespace Jump
         public int magazinebullet;
         public int magazinebulletlimit;
         public double volumeadjust = 0.2;
-        public int money = 0;
 
         public bool IsJump = false;
         public bool IsShoot = false;
@@ -59,7 +59,9 @@ namespace Jump
         public bool IsHoldCtrlLeft = false;
         public bool IsChangeMap = false;
         public bool NotChangeMap = false;
+        public bool InShopnInven = false;
         public bool InShop = false;
+        public bool InInventory = false;
         public bool IsSpawnPirate = false;
         public bool IsHaveAspotate = false;
         public bool IsHaveBoss = false;
@@ -557,13 +559,13 @@ namespace Jump
 
             while (!player.IsDead)
             {
-                if (InShop)
+                if (InShopnInven)
                 {
                     ToShop();
                     return;
                 }
 
-                InShop = false;
+                InShopnInven = false;
 
                 if (bulletAmount <= 0)
                 {
@@ -890,7 +892,7 @@ namespace Jump
             mapindex++;
             changetime++;
 
-            InShop = true;
+            InShopnInven = true;
 
             ClearEntity();
         }
@@ -932,7 +934,7 @@ namespace Jump
             else
             {
                 // player avoid //
-                if (!player.IsDead && !InShop)
+                if (!player.IsDead && !InShopnInven)
                 {
                     Playground.Children.Remove(entity.entity);
                     if (!entity.IsHarmless) ScoreUp(1);
@@ -1254,7 +1256,7 @@ namespace Jump
 
             try
             {
-                InShop = false;
+                InShopnInven = false;
                 GameStart();
             }
             catch (Exception ex)
@@ -1312,7 +1314,9 @@ namespace Jump
 
         public async void ToShop()
         {
+            InShopnInven = true;
             InShop = true;
+            InInventory = false;
             ClearEntity();
 
             if (player.IsDead) player.IsDead = false;
@@ -1399,7 +1403,8 @@ namespace Jump
             return img;
         }
 
-        // SHOP //
+            // SHOP //
+
         public StackPanel CreateWeaponStalls()
         {
             StackPanel weaponstalls = new StackPanel()
@@ -1413,28 +1418,28 @@ namespace Jump
                 },
             };
 
-            var pistol = CreatePistolStalls();
+            var equipment = CreateEquipmentStalls();
             var rifle = CreateRifleStalls();
 
-            weaponstalls.Children.Add(pistol);
+            weaponstalls.Children.Add(equipment);
             weaponstalls.Children.Add(rifle);
 
-            ItemPistolStalls(pistol);
+            ItemEquipmentStalls(equipment);
             ItemRifleStalls(rifle);
 
             return weaponstalls;
         }
 
-        public StackPanel CreatePistolStalls()
+        public StackPanel CreateEquipmentStalls()
         {
-            StackPanel pistol = new StackPanel()
+            StackPanel equipment = new StackPanel()
             {
                 Width = 900,
                 Height = 325,
                 Orientation = Orientation.Horizontal,
                 Background = Brushes.Transparent,
             };
-            return pistol;
+            return equipment;
         }
 
         public StackPanel CreateRifleStalls()
@@ -1449,7 +1454,7 @@ namespace Jump
             return rifle;
         }
 
-        public void ItemPistolStalls(StackPanel pistolstalls)
+        public void ItemEquipmentStalls(StackPanel equipmentstalls)
         {
             
 
@@ -1458,6 +1463,7 @@ namespace Jump
         public void ItemRifleStalls(StackPanel riflestalls)
         {
             AddItemShop("m4a4", riflestalls);
+            AddItemShop("awp", riflestalls);
         }
 
         public void AddItemShop(string gunname, StackPanel stalls)
@@ -1471,7 +1477,6 @@ namespace Jump
 
             stalls.Children.Add(newitem.Additem(gunname));
         }
-
 
             // INVENTORY //
         
@@ -1521,7 +1526,14 @@ namespace Jump
 
             if (shopninven.SelectedIndex == 1)
             {
+                InInventory = true;
+                InShop = false;
                 AddItemInventory();
+            }
+            else
+            {
+                InShop = true;
+                InInventory = false;
             }
         }
     }

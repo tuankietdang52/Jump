@@ -65,7 +65,7 @@ namespace Jump
             buysound.Play();
         }
 
-        public Rectangle CreateImage(string pathgunimg)
+        public Rectangle ImginShop(string pathgunimg)
         {
             Rectangle img = new Rectangle()
             {
@@ -79,7 +79,31 @@ namespace Jump
             return img;
         }
 
-        public Button CreateButton(string buttonimg, string gunname)
+        public Rectangle ImginInventory(string pathgunimg)
+        {
+            Rectangle img = new Rectangle()
+            {
+                Width = 200,
+                Height = 210,
+                Fill = new ImageBrush
+                {
+                    ImageSource = new BitmapImage(new(pathgunimg)),
+                }
+            };
+            return img;
+        }
+
+        public Rectangle CreateImage(string pathgunimg)
+        {
+            Rectangle img;
+
+            if (main!.InShop) img = ImginShop(pathgunimg);
+            else img = ImginInventory(pathgunimg);
+
+            return img;
+        }
+
+        public Button ButtonBuy(string buttonimg)
         {
             Button buy = new Button()
             {
@@ -92,18 +116,42 @@ namespace Jump
                     Stretch = Stretch.Fill,
                 },
             };
+            return buy;
+        }
+
+        public Button ButtonUse(string buttonimg)
+        {
+            Button use = new Button()
+            {
+                Width = 200,
+                Height = 100,
+                Content = new Image
+                {
+                    Source = new BitmapImage(new(buttonimg)),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Stretch = Stretch.Fill,
+                },
+            };
+            return use;
+        }
+
+        public Button CreateButton(string buttonimg, string gunname)
+        {
+            Button button;
+            if (main!.InShop) button = ButtonBuy(buttonimg);
+            else button = ButtonUse(buttonimg);
 
             if (!IsBuy)
             {
                 if (!AlreadyHaveGun(gunname))
                 {
-                    buy.Click += Buy;
-                    buy.ToolTip = ShowCost(gunname);
+                    button.Click += Buy;
+                    button.ToolTip = ShowCost(gunname);
                 }
             }
-            else buy.Click += UseGun;
+            else button.Click += UseGun;
 
-            return buy;
+            return button;
         }
 
         public Image ShowCost(string gunname)
@@ -123,6 +171,9 @@ namespace Jump
             {
                 case "m4a4":
                     return pathpic + "m4a4cost.png";
+
+                case "awp":
+                    return pathpic + "awpcost.png";
 
                 default:
                     return "";
@@ -144,10 +195,10 @@ namespace Jump
 
             getPathButtonImg(ref buttonimg, gunname);
 
-            var buy = CreateButton(buttonimg, gunname);
+            var button = CreateButton(buttonimg, gunname);
 
             item.Children.Add(img);
-            item.Children.Add(buy);
+            item.Children.Add(button);
 
             return item;
         }
@@ -158,6 +209,10 @@ namespace Jump
             {
                 case "m4a4":
                     cost = 3100;
+                    break;
+
+                case "awp":
+                    cost = 4750;
                     break;
 
                 default:
@@ -215,6 +270,10 @@ namespace Jump
                 case "m4a4":
                     gun.ChangeGun("m4a4");
                     player!.indexgun = 1;
+                    break;
+                case "awp":
+                    gun.ChangeGun("awp");
+                    player!.indexgun = 2;
                     break;
 
                 default:

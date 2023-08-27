@@ -101,6 +101,9 @@ namespace Jump
 
         public override async Task Action()
         {
+            string soundpath = pathsound + "kamikazesound.mp3";
+            Playsound(soundpath, 100);
+
             var pos = Canvas.GetLeft(this.entity);
             var posheight = Canvas.GetTop(this.entity);
         

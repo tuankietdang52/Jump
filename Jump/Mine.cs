@@ -66,15 +66,5 @@ namespace Jump
                 }
             }
         }
-
-        public void Explode(double pos)
-        {
-            Canvas.SetLeft(this.entity, pos);
-            Canvas.SetTop(this.entity, top);
-
-            string soundpath = pathsound + "explodesound.mp3";
-            SetNewEntity(300, 300);
-            Playsound(soundpath, 1);
-        }
     }
 }

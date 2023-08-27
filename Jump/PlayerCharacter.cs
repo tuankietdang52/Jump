@@ -35,7 +35,7 @@ namespace Jump
 
         public Rect playerhitbox;
 
-        public int indexgun = 0;
+        public int indexgun = 2;
         public double damage;
 
         public bool IsVietCongKilled = false;
@@ -60,7 +60,7 @@ namespace Jump
 
             gun.player = this;
 
-            gun.ChangeGun("de");
+            gun.ChangeGun("awp");
             inventory.Add("de");
             gun.getPathGun(indexgun);
 

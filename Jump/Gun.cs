@@ -50,6 +50,10 @@ namespace Jump
                     getPathGun(1);
                     player!.damage = 30;
                     break;
+                case "awp":
+                    getPathGun(2);
+                    player!.damage = 100;
+                    break;
                 default:
                     return;
             }
@@ -86,6 +90,10 @@ namespace Jump
                     bulletlimit = 30;
                     magazinebulletlimit = 90;
                     break;
+                case 2:
+                    bulletlimit = 5;
+                    magazinebulletlimit = 30;
+                    break;
                 default:
                     return;
             }
@@ -98,6 +106,8 @@ namespace Jump
                 case 0:
                     return 50;
                 case 1:
+                    return 100;
+                case 2:
                     return 100;
                 default:
                     return 0;
