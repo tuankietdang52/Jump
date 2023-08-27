@@ -29,9 +29,12 @@ namespace Jump
         public MediaPlayer slashsound = new MediaPlayer();
 
         public Random actionrand = new Random();
+        public TimeSpan soundpos;
+
         public int actions = 0;
 
         public bool IsShoot = false;
+        public bool resumesound = false;
 
         public double armor = 40;
         public int actionindex;
@@ -179,6 +182,19 @@ namespace Jump
 
             while (IsShoot && !IsDead)
             {
+                if (main!.IsPause)
+                {
+                    soundpos = GetPositonSound();
+                    resumesound = true;
+                    await Task.Delay(1);
+                    continue;
+                }
+                else if (resumesound)
+                {
+                    ResumeSound(soundpos);
+                    resumesound = false;
+                }
+
                 await Task.Delay(100);
 
                 var left = Canvas.GetLeft(this.entity);
@@ -206,6 +222,12 @@ namespace Jump
 
             while (bulletcount <= 1)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 await Task.Delay(50);
 
                 var left = Canvas.GetLeft(this.entity);
@@ -273,6 +295,12 @@ namespace Jump
 
             while (pos >= 150)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 TimeSpan move = TimeSpan.FromSeconds(0.01);
                 await Task.Delay(move);
                 Dash(ref pos);
@@ -300,6 +328,12 @@ namespace Jump
 
             while (pos >= 150)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 TimeSpan move = TimeSpan.FromSeconds(0.04);
                 await Task.Delay(move);
                 Dash(ref pos);
@@ -317,6 +351,12 @@ namespace Jump
             var pos = Canvas.GetLeft(this.entity);
             while (pos <= 780)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 TimeSpan move = TimeSpan.FromSeconds(0.01);
                 await Task.Delay(move);
                 DashBack(ref pos);
@@ -387,7 +427,15 @@ namespace Jump
 
             while (!IsDead)
             {
-                if (player!.IsDead) return;
+                if (main!.IsPause)
+                {
+                    skilltime.Stop();
+                    await Task.Delay(1);
+                    continue;
+                }
+                else skilltime.Start();
+
+                if (player!.IsDead || main.IsQuit) return;
 
                 if (getHit)
                 {

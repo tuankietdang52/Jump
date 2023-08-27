@@ -62,6 +62,12 @@ namespace Jump
             {
                 if (player!.IsDead) return;
 
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 TimeSpan move = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(move);
 

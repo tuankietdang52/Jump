@@ -32,6 +32,7 @@ namespace Jump
         public Rectangle bullet = new Rectangle();
         public MediaPlayer gunsound = new MediaPlayer();
         public Gun gun = new Gun();
+        public MainWindow? main { get; set; }
         public PlayerCharacter? player { get; set; }
 
         public Bullet()
@@ -72,6 +73,14 @@ namespace Jump
 
             while (bulletpos < 1000)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
+                if (player.IsDead || main.IsQuit) return;
+
                 Canvas.SetLeft(bullet, bulletpos);
                 TimeSpan bulletmove = TimeSpan.FromSeconds(0.007);
                 await Task.Delay(bulletmove);
@@ -79,10 +88,11 @@ namespace Jump
 
                 if (HitEntity())
                 {
-                    return;
+                    if (!player.IsHaveAwp) return;
                 }
             }
         }
+
         public bool HitEntity()
         {
             if (entities!.Count == 0)

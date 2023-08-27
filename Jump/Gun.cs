@@ -46,17 +46,22 @@ namespace Jump
                     getPathGun(0);
                     player!.damage = 50;
                     break;
+
                 case "m4a4":
                     getPathGun(1);
                     player!.damage = 30;
                     break;
+
                 case "awp":
                     getPathGun(2);
                     player!.damage = 100;
-                    break;
+                    player!.IsHaveAwp = true;
+                    return;
+
                 default:
                     return;
             }
+            player!.IsHaveAwp = false;
         }
 
         public void getPathGun(int indexgun)
@@ -86,14 +91,17 @@ namespace Jump
                     bulletlimit = 7;
                     magazinebulletlimit = 35;
                     break;
+
                 case 1:
                     bulletlimit = 30;
                     magazinebulletlimit = 90;
                     break;
+
                 case 2:
                     bulletlimit = 5;
                     magazinebulletlimit = 30;
                     break;
+
                 default:
                     return;
             }

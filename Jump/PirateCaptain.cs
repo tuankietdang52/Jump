@@ -61,8 +61,16 @@ namespace Jump
 
             while (!IsDead)
             {
-                if (player!.IsDead) return;
-                
+                if (main!.IsPause)
+                {
+                    shoottime.Stop();
+                    await Task.Delay(1);
+                    continue;
+                }
+                else shoottime.Start();
+
+                if (player!.IsDead || main.IsQuit) return;
+
                 SetHealth(ref health);
 
                 if (CheckHitTime(health)) return;

@@ -126,7 +126,15 @@ namespace Jump
 
             while (!IsDead)
             {
-                if (player!.IsDead) return;
+                if (main!.IsPause)
+                {
+                    skilltime.Stop();
+                    await Task.Delay(1);
+                    continue;
+                }
+                else skilltime.Start();
+
+                if (player!.IsDead && main!.IsQuit) return;
 
                 if (getHit)
                 {

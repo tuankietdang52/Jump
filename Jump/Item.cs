@@ -37,6 +37,7 @@ namespace Jump
 
         public Rectangle? item { get; set; }
         public PlayerCharacter? player { get; set; }
+        public MainWindow? main { get; set; }
 
         public Item() { }
 
@@ -68,6 +69,14 @@ namespace Jump
             double posmag = Canvas.GetLeft(item);
             while (posmag > -30)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
+                if (player!.IsDead || main.IsQuit) return;
+
                 Canvas.SetLeft(item, posmag);
 
                 TimeSpan magmove = TimeSpan.FromSeconds(0.05);

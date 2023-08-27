@@ -49,8 +49,13 @@ namespace Jump
             double pos = Canvas.GetLeft(this.entity);
             while (pos > 0)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
 
-                if (player!.IsDead) return;
+                if (player!.IsDead || main.IsQuit) return;
 
                 TimeSpan move = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(move);

@@ -65,6 +65,8 @@ namespace Jump
         public bool IsSpawnPirate = false;
         public bool IsHaveAspotate = false;
         public bool IsHaveBoss = false;
+        public bool IsPause = false;
+        public bool IsQuit = false;
 
         private readonly string pathsave = $"{Directory.GetCurrentDirectory()}\\HiScore.txt";
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
@@ -135,12 +137,12 @@ namespace Jump
             CreateStartButton();
         }
 
-        private void CreateStartButton()
+        public Button CreateButton(string text, string name)
         {
-            TextBlock starttxt = new()
+            TextBlock txt = new()
             {
                 FontSize = 25,
-                Text = "START",
+                Text = text,
 
                 Foreground = Brushes.LightSkyBlue,
                 FontWeight = FontWeights.Bold,
@@ -148,32 +150,39 @@ namespace Jump
                 VerticalAlignment = VerticalAlignment.Center
             };
 
-            Grid startstack = new()
+            Grid stack = new()
             {
                 Height = 50,
                 Width = 300,
                 Background = new ImageBrush
                 {
-                    ImageSource = new BitmapImage(new(pathpic + "start.jpg")),
+                    ImageSource = new BitmapImage(new(pathpic + "buttonimg.jpg")),
                     Stretch = Stretch.Fill,
                 }
             };
 
-            Button start = new()
+            stack.Children.Add(txt);
+
+            Button button = new()
             {
-                Name = "Start",
+                Name = name,
                 Height = 50,
                 Width = 300,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Content = startstack
+                Content = stack
             };
+
+            return button;
+        }
+
+        private void CreateStartButton()
+        {
+            Button start = CreateButton("START", "Start");
 
 
             start.Click += PreStartGame;
 
             RegisterName(start.Name, start);
-
-            startstack.Children.Add(starttxt);
 
             Canvas.SetLeft(start, 345);
             Canvas.SetTop(start, 225);
@@ -194,13 +203,13 @@ namespace Jump
 
             theme.Stop();
 
+            if (!IsQuit) SetPlayer();
+            else ShowPlayer();
+
             GetPathMapandTheme();
             await BlackScreenChanging();
 
             ChangeGameVisibility(Visibility.Visible);
-
-
-            SetPlayer();
 
             setphase.main = (MainWindow)Main;
 
@@ -211,8 +220,8 @@ namespace Jump
 
         public void SetPlayer()
         {
+            player.main = this;
             player.playershape.Name = "Player";
-            player.main = (MainWindow?)Main;
             gun.player = this.player;
 
             RegisterName(player.playershape.Name, player.playershape);
@@ -220,6 +229,11 @@ namespace Jump
             Playground.Children.Add(player.playershape);
 
             getAmountBullet();
+        }
+
+        public void ShowPlayer()
+        {
+            player.playershape.Visibility = Visibility.Visible;
         }
 
         private void CreateGameDisplay()
@@ -416,6 +430,7 @@ namespace Jump
 
         public void ScoreUp(int amountscore)
         {
+            if (IsQuit) return;
             GunScore(ref amountscore);
 
             score += amountscore;
@@ -527,8 +542,11 @@ namespace Jump
 
         public async void GameStart()
         {
+            IsQuit = false;
             if (IsReplay)
             {
+                GetPathMapandTheme();
+                ChangeBackground();
                 DeleteReplayElement();
                 ChangeMapName("Map: Galaxy", Brushes.Purple);
             }
@@ -559,6 +577,15 @@ namespace Jump
 
             while (!player.IsDead)
             {
+                if (IsPause)
+                {
+                    timetochangemov.Stop();
+                    await Task.Delay(1);
+                    continue;
+                }
+
+                if (IsQuit) return;
+
                 if (InShopnInven)
                 {
                     ToShop();
@@ -627,7 +654,7 @@ namespace Jump
 
             }
 
-            GameOver();
+            if (!IsQuit) GameOver();
         }
 
         public void ChangeElementMap()
@@ -672,40 +699,10 @@ namespace Jump
         
         private void CreateButtonReplay()
         {
-            Button replay = new()
-            {
-                Name = "Replay",
-                Height = 50,
-                Width = 300,
-                HorizontalAlignment = HorizontalAlignment.Center,
-            };
-
-            Grid replaystack = new()
-            {
-                Height = 50,
-                Width = 300,
-                Background = new ImageBrush
-                {
-                    ImageSource = new BitmapImage(new(pathpic + "start.jpg")),
-                    Stretch = Stretch.Fill,
-                }
-            };
-
-            TextBlock replaytxt = new()
-            {
-                FontSize = 25,
-                Text = "REPLAY",
-                Foreground = Brushes.LightSkyBlue,
-                FontWeight = FontWeights.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-            };
+            Button replay = CreateButton("REPLAY", "Replay");
 
             RegisterName(replay.Name, replay);
 
-            replaystack.Children.Add(replaytxt);
-
-            replay.Content = replaystack;
             replay.Click += HandleReplay;
 
             Canvas.SetLeft(replay, 345);
@@ -800,6 +797,7 @@ namespace Jump
             if (player.IsDead) player.IsHaveArmor = false;
             player.IsDead = false;
             player.IsVietCongKilled = false;
+            player.IsHaveAwp = false;
 
             player.Default();
         }
@@ -815,7 +813,7 @@ namespace Jump
 
         public void RestartElement()
         {
-            Main.KeyDown -= ReplayKey;
+            if (!IsQuit) Main.KeyDown -= ReplayKey;
 
             timetochangemov.Restart();
 
@@ -832,8 +830,6 @@ namespace Jump
             getAmountBullet();
             AmountBullet();
             ShowMoney();
-
-            CreateGameDisplay();
 
             theme.Stop();
         }
@@ -984,6 +980,7 @@ namespace Jump
         {
             Magazine mag = new Magazine();
             mag.player = this.player;
+            mag.main = this;
 
             Playground.Children.Add(mag.item);
 
@@ -1006,6 +1003,7 @@ namespace Jump
             Armor armor = new Armor();
             armor.player = this.player;
             armor.playground = Playground;
+            armor.main = this;
 
             Playground.Children.Add(armor.item);
 
@@ -1055,35 +1053,92 @@ namespace Jump
             }
         }
 
+        public void ResumeKey(Key key)
+        {
+            if (key == Key.Escape)
+            {
+                IsPause = false;
+                Resume();
+
+                var playertop = Canvas.GetTop(player.playershape);
+                if (playertop >= 250 && !IsCrouch)
+                {
+                    player.setDefault();
+                    player.Default();
+                }
+            }
+        }
+
+        public void CheckCrouchPause(Key key)
+        {
+            if (key == Key.LeftCtrl)
+            {
+                player.crouch = true;
+                IsCrouch = true;
+            }
+        }
+
         private void KeyCommand(object sender, KeyEventArgs e)
         {
             if (player.IsDead) return;
 
             Key key = e.Key;
 
+            if (IsPause)
+            {
+                CheckCrouchPause(key);
+                ResumeKey(key);
+                return;
+            }
+
             switch (key)
             {
                 case Key.Space:
                     HandleJump();
                     break;
+
                 case Key.LeftCtrl:
                     HandleCrouch();
                     break;
+
                 case Key.J:
-                    HandleShoot();
+                    if (!player.IsHaveAwp) HandleShoot();
+                    else HandleAwpShoot();
                     break;
+
                 case Key.R:
                     HandleReload();
                     break;
+
+                case Key.Escape:
+                    HandlePause();
+                    break;
+
                 default:
                     return;
             }
            
         }
 
+        public void ReleaseCrouchPause(Key key)
+        {
+            if (key == Key.LeftCtrl)
+            {
+                player.crouch = false;
+                IsCrouch = false;
+                IsHoldCtrlLeft = false;
+            }
+        }
+
         private void ReleaseKey(object sender, KeyEventArgs e)
         {
             Key key = e.Key;
+            if (IsPause)
+            {
+                ReleaseCrouchPause(key);
+                return;
+            }
+
             switch (key)
             {
                 case Key.LeftCtrl:
@@ -1178,6 +1233,7 @@ namespace Jump
             {
                 entities = this.entities,
                 player = this.player,
+                main = this,
                 posout = Canvas.GetTop(player.playershape),
             };
 
@@ -1185,6 +1241,38 @@ namespace Jump
 
             Playground.Children.Add(bullet.bullet);
             player.Shoot(bullet, Playground);
+        }
+
+        private async void HandleAwpShoot()
+        {
+            if (IsReload) return;
+
+            if (bulletAmount <= 0) return;
+
+            if (IsShoot) return;
+
+            IsShoot = true;
+            bulletAmount--;
+
+            AmountBullet();
+
+            Bullet bullet = new Bullet()
+            {
+                entities = this.entities,
+                player = this.player,
+                main = this,
+                posout = Canvas.GetTop(player.playershape),
+            };
+
+            bullet.setPosition();
+
+            Playground.Children.Add(bullet.bullet);
+            player.Shoot(bullet, Playground);
+
+            await Task.Delay(500);
+            item.PlaySound("awp");
+            await Task.Delay(800);
+            IsShoot = false;
         }
 
         private void ReleaseCtrlLeft()
@@ -1535,6 +1623,125 @@ namespace Jump
                 InShop = true;
                 InInventory = false;
             }
+        }
+
+        // PAUSE GAME //
+
+        public void HandlePause()
+        {
+            if (!InShopnInven && !player.IsDead)
+            {
+                IsPause = true;
+                CreateBlackScreen();
+                ButtonInPause();
+            }
+        }
+        
+        public void CreateBlackScreen()
+        {
+            Rectangle blackscreen = new Rectangle()
+            {
+                Height = 664,
+                Width = 1002,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Focusable = false,
+                Name = "BlackScreen",
+            };
+
+            RegisterName(blackscreen.Name, blackscreen);
+
+            SolidColorBrush black = new SolidColorBrush();
+            black.Color = Colors.Black;
+
+            blackscreen.Fill = black;
+            blackscreen.Fill.Opacity = 0.4;
+
+            Playground.Children.Add(blackscreen);
+        }
+
+        public void ButtonInPause()
+        {
+            StackPanel buttoninpause = new StackPanel()
+            {
+                Height = 650,
+                Width = 350,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Name = "ButtonsInPause",
+            };
+
+            Canvas.SetLeft(buttoninpause, 345);
+
+            RegisterName(buttoninpause.Name, buttoninpause);
+
+            var resume = CreateButtonResume();
+            var quit = CreateButtonQuit();
+
+            buttoninpause.Children.Add(resume);
+            buttoninpause.Children.Add(quit);
+
+            Playground.Children.Add(buttoninpause);
+        }
+
+        public Button CreateButtonResume()
+        {
+            Button resume = CreateButton("RESUME", "Resume");
+
+            resume.Margin = new Thickness(0, 60, 0, 0);
+            resume.Click += HandleResume;
+
+            return resume;
+        }
+
+        public Button CreateButtonQuit()
+        {
+            Button quit = CreateButton("QUIT", "Quit");
+
+            quit.Margin = new Thickness(0, 80, 0, 0);
+            quit.Click += Quit;
+
+            return quit;
+        }
+
+        public void Quit(object sender, RoutedEventArgs e)
+        {
+            IsQuit = true;
+            IsPause = false;
+
+            RestartElement();
+            DeletePauseElement();
+
+            Main.KeyDown -= KeyCommand;
+            Main.KeyUp -= ReleaseKey;
+            player.playershape.Visibility = Visibility.Hidden;
+
+            ChangeGameVisibility(Visibility.Hidden);
+
+            CreateGameDisplay();
+            MainMenu();
+        }
+
+        public void HandleResume(object sender, RoutedEventArgs e)
+        {
+            ResumeKey(Key.Escape);
+        }
+
+        public void Resume()
+        {
+            DeletePauseElement();
+        }
+
+        public void DeletePauseElement()
+        {
+            Rectangle blackscreen = (Rectangle)Playground.FindName("BlackScreen");
+            StackPanel buttoninpause = (StackPanel)Playground.FindName("ButtonsInPause");
+
+            Playground.Children.Remove(blackscreen);
+            Playground.Children.Remove(buttoninpause);
+
+            UnregisterName(blackscreen.Name);
+            UnregisterName(buttoninpause.Name);
         }
     }
 }

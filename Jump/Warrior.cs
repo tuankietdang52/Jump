@@ -86,7 +86,15 @@ namespace Jump
             timetodash.Start();
             while (pos > -30)
             {
-                if (player!.IsDead) break;
+                if (main!.IsPause)
+                {
+                    timetodash.Stop();
+                    await Task.Delay(1);
+                    continue;
+                }
+                else timetodash.Start();
+
+                if (player!.IsDead || main.IsQuit) break;
 
                 SetHealth(ref health);
 

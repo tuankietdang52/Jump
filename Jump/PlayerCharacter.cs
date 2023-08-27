@@ -41,9 +41,10 @@ namespace Jump
         public bool IsVietCongKilled = false;
         public bool IsDefaultDead = false;
         public bool IsHaveArmor = false;
+        public bool IsHaveAwp = false;
+        public bool IsDead = false;
 
         public int playerhitboxright { get; }
-        public bool IsDead = false;
         public bool crouch { get; set; }
         public bool jump { get; set; }
 
@@ -107,6 +108,15 @@ namespace Jump
             soundreload.Play();
         }
 
+        public void PlaySound(string soundpath)
+        {
+            MediaPlayer sound = new MediaPlayer();
+
+            sound.Open(new(soundpath));
+            sound.Volume = 100;
+            sound.Play();
+        }
+
         public void setElement(int height, int width)
         {
             playershape.Height = height;
@@ -153,6 +163,12 @@ namespace Jump
             double movedown = Canvas.GetTop(playershape);
             while (movedown < 245)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 Canvas.SetTop(playershape, movedown);
                 TimeSpan dropdown = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(dropdown);
@@ -172,6 +188,12 @@ namespace Jump
             double moveup = Canvas.GetTop(playershape);
             while (moveup > 60)
             {
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 Canvas.SetTop(playershape, moveup);
                 TimeSpan jumpup = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(jumpup);
@@ -252,7 +274,7 @@ namespace Jump
 
             await bullet.Move();
 
-            main!.IsShoot = false; 
+            if (!IsHaveAwp) main!.IsShoot = false; 
 
             playground.Children.Remove(bullet.bullet);
             await Task.Delay(200);

@@ -184,6 +184,19 @@ namespace Jump
             soundplay.Play();
         }
 
+        public void ResumeSound(TimeSpan time)
+        {
+            soundplay.Position = time;
+            soundplay.Play();
+        }
+
+        public TimeSpan GetPositonSound()
+        {
+            soundplay.Stop();
+            var time = soundplay.Position;
+            return time;
+        }
+
 
         // HIT PLAYER //
 
@@ -244,6 +257,8 @@ namespace Jump
         
         public void ChangePositionMove(ref double pos)
         {
+            if (main!.IsPause) return;
+
             Canvas.SetLeft(entity, pos);
             pos -= movementspeed;
         }
@@ -253,8 +268,15 @@ namespace Jump
             double pos = Canvas.GetLeft(entity);
             while (pos > -30)
             {
-                if (player!.IsDead) return;
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
+                if (player!.IsDead || main!.IsQuit) return;
                 if (IsDemon) DemonTurn();
+
 
                 TimeSpan move = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(move);

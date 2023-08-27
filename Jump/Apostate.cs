@@ -114,7 +114,16 @@ namespace Jump
             HandleSkill(pos);
             while (!IsDead)
             {
-                if (player!.IsDead) break;
+                if (main!.IsPause)
+                {
+                    spawntime.Stop();
+                    await Task.Delay(1);
+                    continue;
+                }
+                else spawntime.Start();
+
+                if (player!.IsDead && main.IsQuit) break;
+
                 await Task.Delay(1);
 
                 if (CheckHitTime(basehealthmob)) break;

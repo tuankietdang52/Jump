@@ -42,6 +42,8 @@ namespace Jump
 
         public override void DemonTurn()
         {
+            if (main!.IsPause) return;
+
             mortissound.Volume = 1;
             mortissound.Play();
 
