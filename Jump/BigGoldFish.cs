@@ -30,8 +30,6 @@ namespace Jump
         public Rectangle biggoldfish = new Rectangle();
         public Random actionrand = new Random();
 
-        public double armor = 20;
-
         public bool AlreadyRotate = false;
 
         public int actionindex;
@@ -44,6 +42,8 @@ namespace Jump
 
             left = 780;
             top = 60;
+
+            armor = 20;
 
             movementspeed = 100;
 
@@ -95,16 +95,6 @@ namespace Jump
             }
         }
 
-        public double GetDamage()
-        {
-            double damage = player!.damage -  (player!.damage * (armor / 100));
-            if (damage >= healthbar!.Width)
-            {
-                damage = healthbar!.Width;
-            }
-            return damage;
-        }
-
         public void Dead()
         {
             getHit = true;
@@ -134,13 +124,12 @@ namespace Jump
                 }
                 else skilltime.Start();
 
-                if (player!.IsDead && main!.IsQuit) return;
+                if (player!.IsDead || main!.IsQuit) return;
 
                 if (getHit)
                 {
-                    healthbar!.Width -= GetDamage();
-                    getHit = false;
-                    if (healthbar.Width <= 0)
+                    DecreaseHealth();
+                    if (healthbar!.Width <= 0)
                     {
                         Dead();
                         return;
@@ -193,7 +182,12 @@ namespace Jump
 
             while (pos > -10)
             {
-                if (player!.IsDead) return;
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+                if (player!.IsDead || main.IsQuit) return;
 
                 TimeSpan move = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(move);
@@ -217,7 +211,12 @@ namespace Jump
             double pos = Canvas.GetLeft(entity);
             while (pos <= 680)
             {
-                if (player!.IsDead) return;
+                if (main!.IsPause)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+                if (player!.IsDead || main.IsQuit) return;
 
                 TimeSpan move = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(move);
@@ -227,7 +226,7 @@ namespace Jump
                 if (CheckHitPlayer()) return;
             }
 
-            for (double angle = 270; angle >= 0; angle -= 10)
+            for (double angle = 270; angle <= 360; angle += 10)
             {
                 entity!.RenderTransform = new RotateTransform(angle);
                 await Task.Delay(10);
@@ -239,7 +238,7 @@ namespace Jump
         public async Task Rotate()
         {
             AlreadyRotate = true;
-            for (double angle = 0; angle <= 270; angle += 10)
+            for (double angle = 360; angle >= 270; angle -= 10)
             {
                 entity!.RenderTransform = new RotateTransform(angle);
                 await Task.Delay(10);

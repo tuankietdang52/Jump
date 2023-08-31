@@ -29,13 +29,9 @@ namespace Jump
 
         public Gun()
         {
-            using var read = new StreamReader(pathgun);
-            string line;
-            while (true)
-            {
-                if ((line = read.ReadLine()!) == null) break;
-                listgun.Add(line);
-            }
+            listgun.Add("de");
+            listgun.Add("m4a4");
+            listgun.Add("awp");
         }
 
         public void ChangeGun(string name)
@@ -54,7 +50,7 @@ namespace Jump
 
                 case "awp":
                     getPathGun(2);
-                    player!.damage = 100;
+                    player!.damage = 80;
                     player!.IsHaveAwp = true;
                     return;
 

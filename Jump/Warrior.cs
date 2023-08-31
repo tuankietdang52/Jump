@@ -75,6 +75,16 @@ namespace Jump
             playground!.Children.Add(dash);
         }
 
+        public void DashAnimation(double pos)
+        {
+            Playsound(slashsound!, 1);
+            pathimgentity = pathpic + "warriorslash.png";
+            SetEntity();
+
+            if (!IsDash) CreateDashEffect(pos);
+            IsDash = true;
+        }
+
         public override async Task Action()
         {
             double pos = Canvas.GetLeft(this.entity);
@@ -108,12 +118,7 @@ namespace Jump
                 }
                 if (timetodash.Elapsed.Seconds < 2) continue;
 
-                Playsound(slashsound!, 1);
-                pathimgentity = pathpic + "warriorslash.png";
-                SetEntity();
-
-                if (!IsDash) CreateDashEffect(pos);
-                IsDash = true;
+                DashAnimation(pos);
 
                 TimeSpan move = TimeSpan.FromSeconds(0.01);
                 await Task.Delay(move);

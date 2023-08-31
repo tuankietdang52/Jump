@@ -25,6 +25,7 @@ namespace Jump
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
 
         public Rectangle mac10bullet = new Rectangle();
+        public Entity? boss { get; set; }
 
         public Mac10Bullet(double left, double top, PlayerCharacter player, Canvas playground, MainWindow main)
         {
@@ -60,13 +61,14 @@ namespace Jump
             double pos = Canvas.GetLeft(entity);
             while (pos > 0)
             {
-                if (player!.IsDead) return;
-
                 if (main!.IsPause)
                 {
                     await Task.Delay(1);
                     continue;
                 }
+
+                if (player!.IsDead || main!.IsQuit) return;
+                if (boss!.IsDead) return;
 
                 TimeSpan move = TimeSpan.FromSeconds(0.05);
                 await Task.Delay(move);

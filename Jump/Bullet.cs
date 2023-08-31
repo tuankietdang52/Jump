@@ -71,7 +71,7 @@ namespace Jump
             speed = gun.getBulletspeed(player!.indexgun);
             double bulletpos = Canvas.GetLeft(bullet);
 
-            while (bulletpos < 1000)
+            while (bulletpos < 1200)
             {
                 if (main!.IsPause)
                 {

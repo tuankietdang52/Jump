@@ -122,7 +122,7 @@ namespace Jump
                 }
                 else spawntime.Start();
 
-                if (player!.IsDead && main.IsQuit) break;
+                if (player!.IsDead || main.IsQuit) break;
 
                 await Task.Delay(1);
 

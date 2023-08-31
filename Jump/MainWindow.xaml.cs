@@ -36,10 +36,10 @@ namespace Jump
     {
         public int phase = 3;
         public int mapindex = 3;
-        public int changetime = 7;
+        public int changetime = 9;
 
         public int timechange = 30;
-        public int limitchangetime = 8;
+        public int limitchangetime = 9;
 
         public int money = 20000;
         public int score = 0;
@@ -245,7 +245,6 @@ namespace Jump
             theme.MediaEnded += Looptheme!;
         }
 
-
         // BACKGROUND AND MAP //
 
         public void ChangeBackground()
@@ -324,6 +323,14 @@ namespace Jump
                     themepath = pathsound + "Cloud Heaven.mp3";
                     volumeadjust = 0.2;
                     ChangeMapName("BOSS: Shogun", Brushes.Red);
+                    return true;
+
+                case 3:
+                    backgroundpath = pathpic + "Astrolab.jpg";
+                    undergroundpath = pathpic + "astrolabground.png";
+                    themepath = pathsound + "Astrolab.mp3";
+                    volumeadjust = 0.5;
+                    ChangeMapName("BOSS: Dark Mage", Brushes.Violet);
                     return true;
 
                 default:
@@ -619,7 +626,7 @@ namespace Jump
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
             
-                if (elapsedtime >= timechange)
+                if (elapsedtime >= 1)
                 {
                     timetochangemov.Restart();
                     changetime++;
@@ -783,8 +790,10 @@ namespace Jump
             foreach (var entity in entities)
             {
                 entity.soundplay.Stop();
+                entity.IsDead = true;
                 Playground.Children.Remove(entity.entity);
                 if (entity.healthbar != null) Playground.Children.Remove(entity.healthbar);
+                if (entity.secondhealthbar != null) Playground.Children.Remove(entity.secondhealthbar);
             }
 
             entities.Clear();
@@ -794,10 +803,13 @@ namespace Jump
         {
             player.setDefault();
 
-            if (player.IsDead) player.IsHaveArmor = false;
+            if (player.IsDead)
+            {
+                player.IsHaveArmor = false;
+                player.IsHaveAwp = false;
+            }
             player.IsDead = false;
             player.IsVietCongKilled = false;
-            player.IsHaveAwp = false;
 
             player.Default();
         }
@@ -1055,7 +1067,7 @@ namespace Jump
 
         public void ResumeKey(Key key)
         {
-            if (key == Key.Escape)
+            if (key == Key.P)
             {
                 IsPause = false;
                 Resume();
@@ -1110,7 +1122,7 @@ namespace Jump
                     HandleReload();
                     break;
 
-                case Key.Escape:
+                case Key.P:
                     HandlePause();
                     break;
 
@@ -1422,7 +1434,7 @@ namespace Jump
             CreateButtonPlay();
             MyMoney();
 
-            themepath = pathsound + "vendetta.mp3";
+            themepath = pathsound + "ireallywannastayatyourhouse.mp3";
             PlayTheme(themepath, 0.4);
         } 
 
@@ -1506,6 +1518,13 @@ namespace Jump
                 },
             };
 
+            AddStalls(weaponstalls);
+
+            return weaponstalls;
+        }
+
+        public void AddStalls(StackPanel weaponstalls)
+        {
             var equipment = CreateEquipmentStalls();
             var rifle = CreateRifleStalls();
 
@@ -1514,8 +1533,6 @@ namespace Jump
 
             ItemEquipmentStalls(equipment);
             ItemRifleStalls(rifle);
-
-            return weaponstalls;
         }
 
         public StackPanel CreateEquipmentStalls()
@@ -1675,13 +1692,18 @@ namespace Jump
 
             RegisterName(buttoninpause.Name, buttoninpause);
 
+            AddButtonToPause(buttoninpause);
+
+            Playground.Children.Add(buttoninpause);
+        }
+
+        public void AddButtonToPause(StackPanel buttoninpause)
+        {
             var resume = CreateButtonResume();
             var quit = CreateButtonQuit();
 
             buttoninpause.Children.Add(resume);
             buttoninpause.Children.Add(quit);
-
-            Playground.Children.Add(buttoninpause);
         }
 
         public Button CreateButtonResume()
@@ -1704,6 +1726,8 @@ namespace Jump
             return quit;
         }
 
+            // QUIT //
+
         public void Quit(object sender, RoutedEventArgs e)
         {
             IsQuit = true;
@@ -1722,9 +1746,11 @@ namespace Jump
             MainMenu();
         }
 
+            // RESUME //
+
         public void HandleResume(object sender, RoutedEventArgs e)
         {
-            ResumeKey(Key.Escape);
+            ResumeKey(Key.P);
         }
 
         public void Resume()

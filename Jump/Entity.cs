@@ -29,7 +29,9 @@ namespace Jump
         public MediaPlayer soundplay = new MediaPlayer();
         public Canvas? playground { get; set; }
         public MainWindow? main { get; set; }
+
         public Rectangle? healthbar = null;
+        public Rectangle? secondhealthbar = null;
 
         public Rect entityhitbox;
 
@@ -58,6 +60,7 @@ namespace Jump
         public int turn = 0;
         public int bulletspeed = 100;
         public int hittime = 0;
+        public double armor { get; set; }
         public int basehealthmob { get; set; }
 
         public Entity()
@@ -168,13 +171,29 @@ namespace Jump
             Playsound(soundpath, 1);
         }
 
+        public void DecreaseHealth()
+        {
+            healthbar!.Width -= GetDamage(healthbar);
+            getHit = false;
+        }
+
         // GET SET //
 
         public double getHitboxHeight()
         {
             return entity!.Margin.Bottom;
         }
-        
+
+        public double GetDamage(Rectangle healthbar)
+        {
+            double damage = player!.damage - (player!.damage * (armor / 100));
+            if (damage >= healthbar!.Width)
+            {
+                damage = healthbar!.Width;
+            }
+            return damage;
+        }
+
         // SOUND EFFECT //
 
         public void Playsound(string path, double volumeadjust)

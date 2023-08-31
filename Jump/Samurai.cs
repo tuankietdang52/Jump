@@ -36,7 +36,6 @@ namespace Jump
         public bool IsShoot = false;
         public bool resumesound = false;
 
-        public double armor = 40;
         public int actionindex;
         public int slashindex = 0;
 
@@ -50,11 +49,44 @@ namespace Jump
             left = 780;
             top = 120;
 
+            armor = 40;
+
             pathimgentity = pathpic + "samurai.png";
 
             entity = samurai;
 
             SetEntity();
+        }
+
+        public void CreateSecondHealthbar(double health)
+        {
+            ScaleTransform flip = new ScaleTransform();
+            flip.ScaleX = -1;
+
+            secondhealthbar = new Rectangle()
+            {
+                Width = health,
+                Height = 50,
+
+                Fill = Brushes.LightBlue,
+
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = flip,
+            };
+
+            Canvas.SetRight(secondhealthbar, 0);
+            Canvas.SetTop(secondhealthbar, 0);
+
+            playground!.Children.Add(secondhealthbar);
+        }
+
+        public void CheckSecondHealthbar()
+        {
+            if (secondhealthbar!.Width == 0)
+            {
+                playground!.Children.Remove(secondhealthbar);
+                secondhealthbar = null;
+            }
         }
 
         public void PlaySwordSound(string path)
@@ -68,16 +100,6 @@ namespace Jump
         {
             Rect hitbox = new Rect(Canvas.GetLeft(entity), Canvas.GetTop(entity), width - 30, height);
             return hitbox;
-        }
-
-        public double GetDamage()
-        {
-            double damage = player!.damage - (player!.damage * (armor / 100));
-            if (damage >= healthbar!.Width)
-            {
-                damage = healthbar!.Width;
-            }
-            return damage;
         }
 
         public void Dead()
@@ -157,7 +179,9 @@ namespace Jump
         public async void CreateBullet(double left, double top)
         {
             Mac10Bullet mac10Bullet = new Mac10Bullet(left, top, player!, playground!, main!);
-            
+
+            mac10Bullet.boss = this;
+
             main!.entities.Add(mac10Bullet);
             playground!.Children.Add(mac10Bullet.entity);
 
@@ -415,9 +439,22 @@ namespace Jump
             await Back();
         }
 
+        public void CheckHealth()
+        {
+            if (secondhealthbar == null) healthbar!.Width -= GetDamage(healthbar);
+            else
+            {
+                secondhealthbar.Width -= GetDamage(secondhealthbar);
+                CheckSecondHealthbar();
+            }
+
+            getHit = false;
+        }
+
         public override async Task Action()
         {
             CreateHealthBar(850);
+            CreateSecondHealthbar(425);
 
             double pos = Canvas.GetLeft(this.entity);
 
@@ -439,9 +476,8 @@ namespace Jump
 
                 if (getHit)
                 {
-                    healthbar!.Width -= GetDamage();
-                    getHit = false;
-                    if (healthbar.Width <= 0)
+                    CheckHealth();
+                    if (healthbar!.Width <= 0)
                     {
                         Dead();
                         return;

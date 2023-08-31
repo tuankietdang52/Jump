@@ -80,6 +80,10 @@ namespace Jump
                     Boss2();
                     return;
 
+                case 3:
+                    Boss3();
+                    return;
+
                 default:
                     main!.IsHaveBoss = false;
                     main!.BossIsDefeated();
@@ -106,6 +110,20 @@ namespace Jump
             if (!AlreadyHaveBoss && main!.IsHaveBoss)
             {
                 Entity newentity = changeentity.ChangeEntityMap2(2);
+
+                AlreadyHaveBoss = true;
+
+                await main!.SpawnEntity(newentity);
+
+            }
+            else return;
+        }
+
+        public async void Boss3()
+        {
+            if (!AlreadyHaveBoss && main!.IsHaveBoss)
+            {
+                Entity newentity = changeentity.ChangeEntityMap3(4);
 
                 AlreadyHaveBoss = true;
 

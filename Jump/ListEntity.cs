@@ -196,6 +196,11 @@ namespace Jump
                     newentity = kamikaze;
                     break;
 
+                case 4:
+                    DarkMage darkmage = new DarkMage();
+                    newentity = darkmage;
+                    break;
+
                 default:
                     return newentity = new Entity();
             }
