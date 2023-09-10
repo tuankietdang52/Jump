@@ -77,13 +77,18 @@ namespace Jump
 
                 await Task.Delay(1);
 
-                if (shoottime.Elapsed.Seconds == 2)
-                {
-                    shoottime.Restart();
-                    CreateCannonBullet(pos - 30);
-                }
+                UseSkill(ref shoottime, pos);
             }
             main!.IsSpawnPirate = false;
+        }
+
+        public void UseSkill(ref Stopwatch shoottime, double pos)
+        {
+            if (shoottime.Elapsed.Seconds == 2)
+            {
+                shoottime.Restart();
+                CreateCannonBullet(pos - 30);
+            }
         }
 
         public async void CreateCannonBullet(double left)

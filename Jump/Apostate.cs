@@ -103,6 +103,13 @@ namespace Jump
             SpawnPrevEntity(pos);
         }
 
+        public void UseSkill(ref Stopwatch spawntime, double pos)
+        {
+            spawntime.Restart();
+
+            HandleSkill(pos);
+        }
+
         public override async Task Action()
         {
             main!.IsHaveAspotate = true;
@@ -111,7 +118,6 @@ namespace Jump
             Stopwatch spawntime = new Stopwatch();
 
             spawntime.Start();
-            HandleSkill(pos);
             while (!IsDead)
             {
                 if (main!.IsPause)
@@ -130,9 +136,7 @@ namespace Jump
 
                 if (spawntime.Elapsed.Seconds == 3)
                 {
-                    spawntime.Restart();
-
-                    HandleSkill(pos);
+                    UseSkill(ref spawntime, pos);
 
                     await Task.Delay(1000);
                     SetEntity();

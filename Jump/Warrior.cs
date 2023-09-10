@@ -85,6 +85,17 @@ namespace Jump
             IsDash = true;
         }
 
+        public bool Ready(Stopwatch timetodash)
+        {
+            if (timetodash.Elapsed.Seconds == 1)
+            {
+                SetNewEntity(80, 100);
+            }
+            if (timetodash.Elapsed.Seconds >= 2) return true;
+
+            return false;
+        }
+
         public override async Task Action()
         {
             double pos = Canvas.GetLeft(this.entity);
@@ -112,13 +123,7 @@ namespace Jump
 
                 if (CheckHitTime(health)) break;
 
-                if (timetodash.Elapsed.Seconds == 1)
-                {
-                    SetNewEntity(80, 100);
-                }
-                if (timetodash.Elapsed.Seconds < 2) continue;
-
-                DashAnimation(pos);
+                if (!Ready(timetodash)) continue;
 
                 TimeSpan move = TimeSpan.FromSeconds(0.01);
                 await Task.Delay(move);
@@ -139,6 +144,8 @@ namespace Jump
 
         public void Dash(ref double pos)
         {
+            DashAnimation(pos);
+
             Canvas.SetLeft(dash, pos + 80);
             Canvas.SetTop(dash, 260);
 

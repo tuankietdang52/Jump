@@ -75,8 +75,7 @@ namespace Jump
 
                 if (IsHarmless) continue;
 
-                if (pos <= 500) GetDown(pos);
-                else if (pos <= 800) Showup(pos);
+                Shoot(pos);
 
                 if (getHit)
                 {
@@ -94,6 +93,12 @@ namespace Jump
                 }
 
             }
+        }
+
+        public void Shoot(double pos)
+        {
+            if (pos <= 500) GetDown(pos);
+            else if (pos <= 800) Showup(pos);
         }
 
         public async Task RenderPicture()

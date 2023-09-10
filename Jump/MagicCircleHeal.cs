@@ -77,11 +77,11 @@ namespace Jump
             if (boss!.secondhealthbar!.Width >= 1000) return;
             if (boss!.healthbar!.Width <= 1000)
             {
-                boss.healthbar!.Width += 1;
+                boss.healthbar!.Width += 4;
             }
             else
             {
-                boss.secondhealthbar!.Width += 1;
+                boss.secondhealthbar!.Width += 2;
             }
         }
 

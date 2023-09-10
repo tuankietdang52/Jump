@@ -34,9 +34,9 @@ namespace Jump
 {
     public partial class MainWindow : Window
     {
-        public int phase = 3;
-        public int mapindex = 3;
-        public int changetime = 9;
+        public int phase = 2;
+        public int mapindex = 2;
+        public int changetime = 6;
 
         public int timechange = 30;
         public int limitchangetime = 9;
@@ -621,12 +621,12 @@ namespace Jump
 
                 if (changetime % 3 != 0 || changetime == 0)
                 {
-                    await setphase.ChangePhase();
+                    if (!InShopnInven) await setphase.ChangePhase();
                 }
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
             
-                if (elapsedtime >= 1)
+                if (elapsedtime >= timechange)
                 {
                     timetochangemov.Restart();
                     changetime++;
@@ -677,6 +677,10 @@ namespace Jump
 
             PlayTheme(themepath!, volumeadjust);
         }
+
+        // WIN DISPLAY //
+
+
 
         // GAME OVER DISPLAY //
 
@@ -803,7 +807,7 @@ namespace Jump
         {
             player.setDefault();
 
-            if (player.IsDead)
+            if (player.IsDead || IsQuit)
             {
                 player.IsHaveArmor = false;
                 player.IsHaveAwp = false;
@@ -1735,9 +1739,11 @@ namespace Jump
 
             RestartElement();
             DeletePauseElement();
+            if (player.IsHaveArmor) BreakArmor();
 
             Main.KeyDown -= KeyCommand;
             Main.KeyUp -= ReleaseKey;
+
             player.playershape.Visibility = Visibility.Hidden;
 
             ChangeGameVisibility(Visibility.Hidden);

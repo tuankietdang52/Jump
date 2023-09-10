@@ -102,13 +102,20 @@ namespace Jump
             return hitbox;
         }
 
+        public void DeadAnimation()
+        {
+            string dead = pathpic + "samuraidead.png";
+            Canvas.SetTop(this.entity, 182);
+            entity!.Height = 182;
+            ChangeAnimation(dead);
+        }
+
         public void Dead()
         {
             getHit = true;
             IsDead = true;
-            main!.ClearEntity();
-            player!.IsDead = false;
-            playground!.Children.Remove(healthbar);
+
+            DeadAnimation();
         }
 
         public void ChangeAnimation(string namepath)
@@ -138,8 +145,9 @@ namespace Jump
             newtop = 120;
 
             newpathimg = pathpic + "samurai.png";
-
             SetNewEntity(232, 182);
+
+            if (IsDead) DeadAnimation();
         }
 
         public void GetRandomSkill(double pos)
@@ -439,7 +447,7 @@ namespace Jump
             await Back();
         }
 
-        public void CheckHealth()
+        public void DecreaseBossHealth()
         {
             if (secondhealthbar == null) healthbar!.Width -= GetDamage(healthbar);
             else
@@ -449,6 +457,26 @@ namespace Jump
             }
 
             getHit = false;
+        }
+
+        public void UseSkill(ref Stopwatch skilltime, double pos)
+        {
+            if (skilltime.Elapsed.Seconds == 1)
+            {
+                skilltime.Restart();
+                if (!IsShoot) GetRandomSkill(pos);
+            }
+        }
+
+        public bool CheckDead()
+        {
+            if (healthbar!.Width <= 0)
+            {
+                Dead();
+                return true;
+            }
+
+            return false;
         }
 
         public override async Task Action()
@@ -476,23 +504,25 @@ namespace Jump
 
                 if (getHit)
                 {
-                    CheckHealth();
-                    if (healthbar!.Width <= 0)
-                    {
-                        Dead();
-                        return;
-                    }
-                }
+                    DecreaseBossHealth();
 
-                if (skilltime.Elapsed.Seconds == 1)
-                {
-                    skilltime.Restart();
-                    if (!IsShoot) GetRandomSkill(pos);
+                    if (CheckDead()) break;
                 }
 
                 await Task.Delay(1);
+
+                UseSkill(ref skilltime, pos);
             }
+
+            await Task.Delay(1500);
+            ClearEntity();
         }
 
+        public void ClearEntity()
+        {
+            main!.ClearEntity();
+            player!.IsDead = false;
+            playground!.Children.Remove(healthbar);
+        }
     }
 }

@@ -73,7 +73,7 @@ namespace Jump
             Canvas.SetTop(entity, 60);
         }
 
-        public async void UseSkill(int actionindex, double pos)
+        public async void RandomSkill(int actionindex, double pos)
         {
             switch (actionindex)
             {
@@ -104,6 +104,17 @@ namespace Jump
             playground!.Children.Remove(healthbar);
         }
 
+        public bool CheckDead()
+        {
+            if (healthbar!.Width <= 0)
+            {
+                Dead();
+                return true;
+            }
+
+            return false;
+        }
+
         public override async Task Action()
         {
             CreateHealthBar(700);
@@ -129,30 +140,31 @@ namespace Jump
                 if (getHit)
                 {
                     DecreaseHealth();
-                    if (healthbar!.Width <= 0)
-                    {
-                        Dead();
-                        return;
-                    }
+
+                    if (CheckDead()) return;
                 }
 
                 if (CheckHitPlayer()) return;
 
                 await Task.Delay(1);
 
-                if (skilltime.Elapsed.Seconds == 1)
-                {
-                    skilltime.Restart();
-                    GetRandomSkill(pos);
-                }
-                else continue;
+                UseSkill(ref skilltime, pos);
+            }
+        }
+
+        public void UseSkill(ref Stopwatch skilltime, double pos)
+        {
+            if (skilltime.Elapsed.Seconds == 1)
+            {
+                skilltime.Restart();
+                GetRandomSkill(pos);
             }
         }
 
         public void GetRandomSkill(double pos)
         {
             actionindex = actionrand.Next(0, 11);
-            UseSkill(actionindex, pos);
+            RandomSkill(actionindex, pos);
         }
 
         public void SetGoldFish(ref GoldFish goldfish)

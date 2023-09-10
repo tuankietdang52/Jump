@@ -59,12 +59,8 @@ namespace Jump
 
                 ChangePositionMove(ref pos);
 
-                if (getHit)
-                {
-                    playground!.Children.Remove(this.entity);
-                    main!.entities.Remove(this);
-                    break;
-                }
+                if (getHit) break;
+
                 if (CheckHitPlayer()) break;
             }
             playground!.Children.Remove(this.entity);

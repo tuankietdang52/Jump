@@ -46,6 +46,7 @@ namespace Jump
 
             height = 10;
             width = 10;
+            IsHarmless = true;
         }
 
         public override Rect getHitbox()

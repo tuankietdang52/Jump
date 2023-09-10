@@ -34,14 +34,24 @@ namespace Jump
         public Stopwatch timemove = new Stopwatch();
         public Stopwatch skilltime = new Stopwatch();
 
+        public List<DarkMageClone> clone = new List<DarkMageClone>(3);
+
         public bool IsGetPos = false;
         public bool IsShootDouble = false;
         public bool[] IsTrigger = new bool[10];
+        public bool IsInvisible = false;
+        public bool IsCreateClone = false;
+        public bool IsCreateMagicMissileClone = false;
+        public bool IsClone = false;
 
         public int actions = 0;
         public int missilecount = 0;
         public int timetoskill = 1;
         public int skillphase = 1;
+        public int timetomove = 2;
+
+        public double pointleft;
+        public double pointtop;
 
         public DarkMage()
         {
@@ -167,6 +177,9 @@ namespace Jump
                 case 2:
                     return skillrand.Next(0, 13);
 
+                case 3:
+                    return skillrand.Next(0, 15);
+
                 default:
                     return 0;
             }
@@ -174,12 +187,13 @@ namespace Jump
 
         public void RandomSkill()
         {
+            if (IsBuff) return;
+            if (IsCreateClone) return;
+
             int skillindex = SkillPhase();
 
             var pos = Canvas.GetLeft(this.entity);
             var postop = Canvas.GetTop(this.entity);
-
-            if (IsBuff) return;
 
             switch (skillindex)
             {
@@ -200,6 +214,12 @@ namespace Jump
                     return;
 
                 case 10: case 11:
+                   if (actions != 0) return;
+                   HandleClone();
+                   timetoskill = 0;
+                   return;
+
+                case 12:
                    if (actions == 0) HandleHealing();
                    return;
 
@@ -380,6 +400,89 @@ namespace Jump
             SetDefault();
         }
 
+        public void HandleClone()
+        {
+            IsInvisible = true;
+            IsCreateClone = true;
+            IsHarmless = true;
+            timetomove = 1;
+
+            newpathimg = pathpic + "darkmageskillclone.png";
+
+            SetAnimation(120, 100);
+
+            Clone();
+            CreateMagicCircleClone(this);
+        }
+
+        public async void CreateMagicCircleClone(DarkMage owner)
+        {
+            MagicCircleClone magiccircle = new MagicCircleClone(player!, playground!, main!, owner);
+
+            main!.entities.Add(magiccircle);
+            playground!.Children.Add(magiccircle.entity);
+
+            await magiccircle.Action();
+        }
+
+        public async void Clone()
+        {
+            for (int cloneindex = 0; cloneindex < 3; cloneindex++)
+            {
+                clone.Add(CreateClone(cloneindex));
+                CloneAction(clone[cloneindex]);
+            }
+
+            newpathimg = pathpic + "darkmageskillclone.png";
+            SetAnimation(120, 100);
+
+            await Task.Delay(700);
+            IsInvisible = false;
+        }
+
+        public async void CloneAction(DarkMageClone clone)
+        {
+            CreateMagicCircleClone(clone);
+            await clone.Action();
+        }
+
+        public DarkMageClone CreateClone(int index)
+        {
+            DarkMageClone clone = new DarkMageClone(player!, playground!, main!, this);
+
+            clone.cloneindex = index;
+
+            main!.entities.Add(clone);
+            playground!.Children.Add(clone.entity);
+
+            return clone;
+        }
+
+        public async void CreateMagicMissileClone()
+        {
+            MagicMissileClone magicmissileclone = new MagicMissileClone(player!, playground!, main!);
+
+            magicmissileclone.boss = this;
+
+            main!.entities.Add(magicmissileclone);
+            playground!.Children.Add(magicmissileclone.entity);
+
+            await magicmissileclone.Action();
+        }
+
+        public void CheckClone()
+        {
+            if (clone.Count != 0) return;
+
+            IsCreateClone = false;
+            IsHarmless = false;
+            entity!.Fill.Opacity = 1;
+
+            newpathimg = pathpic + "darkmage.png";
+
+            SetDefault();
+        }
+
         public void StopTime()
         {
             skilltime.Stop();
@@ -410,17 +513,16 @@ namespace Jump
 
                 case >= 200:
                     if (IsTrigger[0]) break;
-                    armor = 70;
                     IsTrigger[0] = true;
-                    skillphase = 2;
-                    Healing();
+                    armor = 70;
                     break;
 
                 case >= 50:
                     if (IsTrigger[1]) break;
-                    timetoskill = 0;
-                    armor = 75;
                     IsTrigger[1] = true;
+                    timetoskill = 0;
+                    skillphase = 2;
+                    HandleClone();
                     break;
 
                 default:
@@ -432,22 +534,44 @@ namespace Jump
         {
             switch (healthbar!.Width)
             {
-                case > 900:
+                case >= 900:
+                    if (IsTrigger[2]) break;
+                    armor = 75;
+                    IsTrigger[2] = true;
                     break;
 
-                case > 800:
-                    if (IsTrigger[2]) break;
+                case >= 680:
+                    if (IsTrigger[3]) break;
                     armor = 80;
-                    IsTrigger[2] = true;
+                    IsTrigger[3] = true;
+                    break;
+
+                case >= 350:
+                    if (IsTrigger[4]) break;
+                    armor = 85;
+                    skillphase = 3;
+                    IsTrigger[4] = true;
+                    Healing();
+                    break;
+
+                case >= 200:
+                    if (IsTrigger[5]) break;
+                    armor = 90;
+                    IsTrigger[5] = true;
+                    break;
+
+                default:
+                    armor = 90;
                     break;
             }
         }
 
-        public void CheckHealth()
+        public void DecreaseBossHealth()
         {
             getHit = false;
 
             if (IsBuff) return;
+            if (IsInvisible) return;
 
             if (secondhealthbar!.Width <= 0)
             {
@@ -457,6 +581,59 @@ namespace Jump
             {
                 secondhealthbar.Width -= GetDamage(secondhealthbar);
             }
+        }
+
+        public void Move(ref double pos, ref double postop)
+        {
+            if (timemove.Elapsed.Seconds > timetomove)
+            {
+                if (!IsGetPos) GetPosToMove(ref pointleft, ref pointtop);
+                MoveLeft(ref pos, pointleft);
+                MoveTop(ref postop, pointtop);
+
+                if (pos == pointleft && postop == pointtop)
+                {
+                    timemove.Restart();
+                    IsGetPos = false;
+                }
+            }
+        }
+
+        public void UseSkill()
+        {
+            if (skilltime.Elapsed.Seconds <= timetoskill) return;
+            if (actions == 0)
+            {
+                RandomSkill();
+                skilltime.Restart();
+            }
+        }
+
+        public void CloneMagic()
+        {
+            CheckClone();
+            if (skilltime.Elapsed.Milliseconds <= 450) return;
+            Random rand = new Random();
+            int issshootindex = rand.Next(0, 4);
+
+            if (issshootindex < 2) CreateMagicMissileClone();
+            skilltime.Restart();
+        }
+
+        public void CheckPhase()
+        {
+            if (secondhealthbar!.Width > 0) CheckPhaseBossSecondHealthBar();
+            else CheckPhaseBoss();
+        }
+
+        public bool CheckDead()
+        {
+            if (healthbar!.Width <= 0)
+            {
+                Dead();
+                return true;
+            }
+            return false;
         }
 
         public override async Task Action()
@@ -470,9 +647,6 @@ namespace Jump
             timemove.Start();
             skilltime.Start();
 
-            double pointleft = 0;
-            double pointtop = 0;
-
             while (!IsDead)
             {
                 if (main!.IsPause)
@@ -485,44 +659,21 @@ namespace Jump
 
                 if (player!.IsDead || main!.IsQuit) break;
 
-
-                if (getHit)
+                if (getHit && !IsHarmless)
                 {
-                    CheckHealth();
+                    DecreaseBossHealth();
 
-                    if (healthbar!.Width <= 0)
-                    {
-                        Dead();
-                        return;
-                    }
+                    if (CheckDead()) return;
                 }
 
-                if (secondhealthbar!.Width >= 0) CheckPhaseBossSecondHealthBar();
-                else CheckPhaseBoss();
+                CheckPhase();
 
                 await Task.Delay(1);
 
-                if (timemove.Elapsed.Seconds > 2)
-                {
-                    if (!IsGetPos) GetPosToMove(ref pointleft, ref pointtop);
-                    MoveLeft(ref pos, pointleft);
-                    MoveTop(ref postop, pointtop);
-                
-                    if (pos == pointleft && postop == pointtop)
-                    {
-                        timemove.Restart();
-                        IsGetPos = false;
-                    }
-                }
+                Move(ref pos, ref postop);
 
-                if (skilltime.Elapsed.Seconds > timetoskill)
-                {
-                    if (actions == 0)
-                    {
-                        RandomSkill();
-                        skilltime.Restart();
-                    }
-                }
+                if (!IsCreateClone) UseSkill();
+                else CloneMagic();
             }
         }
     }
