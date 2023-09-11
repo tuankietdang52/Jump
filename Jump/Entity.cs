@@ -272,7 +272,7 @@ namespace Jump
         }
 
 
-        // MOVE METHOD //
+        // ACTION METHOD //
         
         public void ChangePositionMove(ref double pos)
         {
