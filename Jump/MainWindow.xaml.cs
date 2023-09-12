@@ -972,9 +972,11 @@ namespace Jump
 
         public async Task SpawnMag()
         {
-            Magazine mag = new Magazine();
-            mag.player = this.player;
-            mag.main = this;
+            Magazine mag = new Magazine()
+            {
+                player = this.player,
+                main = this,
+            };
 
             Playground.Children.Add(mag.item);
 
@@ -994,10 +996,12 @@ namespace Jump
 
         public async Task SpawnArmor()
         {
-            Armor armor = new Armor();
-            armor.player = this.player;
-            armor.playground = Playground;
-            armor.main = this;
+            Armor armor = new Armor()
+            {
+                player = this.player,
+                playground = Playground,
+                main = this
+            };
 
             Playground.Children.Add(armor.item);
 
@@ -1161,16 +1165,20 @@ namespace Jump
 
             if (magazinebullet < bulletlimit)
             {
-                bulletAmount = magazinebullet;
-                magazinebullet = 0;
-
-                IsReload = false;
-
+                OutofMag();
                 return;
             }
 
             magazinebullet -= (bulletlimit - bulletAmount);
             bulletAmount = bulletlimit;
+
+            IsReload = false;
+        }
+
+        public void OutofMag()
+        {
+            bulletAmount = magazinebullet;
+            magazinebullet = 0;
 
             IsReload = false;
         }
@@ -1295,6 +1303,15 @@ namespace Jump
 
         // OUT SHOP //
 
+        public void ResetVisibility()
+        {
+            ChangeGameVisibility(Visibility.Visible);
+            ArmorVisibility(Visibility.Visible);
+
+            RestartPlayer();
+            player.playershape.Visibility = Visibility.Visible;
+        }
+
         public async void ContinueToGame(ShopnInven shopnninven)
         {
             Playground.Children.Remove(shopnninven);
@@ -1305,11 +1322,7 @@ namespace Jump
             Main.KeyDown += KeyCommand;
             Main.KeyUp += ReleaseKey;
 
-            ChangeGameVisibility(Visibility.Visible);
-            ArmorVisibility(Visibility.Visible);
-
-            RestartPlayer();
-            player.playershape.Visibility = Visibility.Visible;
+            ResetVisibility();
 
             try
             {
@@ -1325,20 +1338,30 @@ namespace Jump
 
         // SHOP AND INVENTORY //
 
-        public async void ReadyToShop()
+        public void InShopVisibility()
+        {
+            player.playershape.Visibility = Visibility.Hidden;
+            ChangeGameVisibility(Visibility.Hidden);
+            ArmorVisibility(Visibility.Hidden);
+        }
+
+        public void InShopElement()
         {
             InShopnInven = true;
             InShop = true;
             InInventory = false;
+        }
+
+        public async void ReadyToShop()
+        {
+            InShopElement();
             ClearEntity();
 
             if (player.IsDead) player.IsDead = false;
             Main.KeyDown -= KeyCommand;
             Main.KeyUp -= ReleaseKey;
 
-            player.playershape.Visibility = Visibility.Hidden;
-            ChangeGameVisibility(Visibility.Hidden);
-            ArmorVisibility(Visibility.Hidden);
+            InShopVisibility();
 
             backgroundpath = pathpic + "shopshiba.jpg";
             await BlackScreenChanging();
