@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jump.ShopnInvenView;
+using System;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
 using System.IO;
@@ -37,6 +38,7 @@ namespace Jump
         public PlayerCharacter? player { get; set; }
         public Gun gun = new Gun();
         public MediaPlayer buysound = new MediaPlayer();
+        public ShopnInven? shopninven { get; set; }
 
         public bool AlreadyHaveGun(string gunname)
         {
@@ -224,7 +226,7 @@ namespace Jump
             else
             {
                 main.money -= cost;
-                main.ShowMyMoney();
+                shopninven!.ShowMyMoney();
                 return true;
             }
         }
@@ -283,7 +285,7 @@ namespace Jump
             if (!IsUse) PlaySound(name);
 
             main!.getAmountBullet();
-            main!.AddItemInventory();
+            shopninven!.AddItemInventory();
         }
 
         public string CheckGunUsed(string gunname)

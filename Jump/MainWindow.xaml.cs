@@ -29,6 +29,8 @@ using System.Reflection;
 using System.Windows.Automation.Provider;
 using System.Security.Policy;
 using System.Windows.Media.Converters;
+using Jump.Sql;
+using Jump.ShopnInvenView;
 
 namespace Jump
 {
@@ -59,14 +61,14 @@ namespace Jump
         public bool IsHoldCtrlLeft = false;
         public bool IsChangeMap = false;
         public bool NotChangeMap = false;
-        public bool InShopnInven = false;
-        public bool InShop = false;
-        public bool InInventory = false;
         public bool IsSpawnPirate = false;
         public bool IsHaveAspotate = false;
         public bool IsHaveBoss = false;
         public bool IsPause = false;
         public bool IsQuit = false;
+        public bool InShopnInven = false;
+        public bool InShop = false;
+        public bool InInventory = false;
 
         private readonly string pathsave = $"{Directory.GetCurrentDirectory()}\\HiScore.txt";
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
@@ -87,6 +89,8 @@ namespace Jump
         public Phase setphase = new Phase();
         public Inventory item = new Inventory();
         public Rectangle? armoricon;
+        public HighScore highscore = new HighScore();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -97,10 +101,9 @@ namespace Jump
             MainMenu();
         }
 
-        private void ChangeGameVisibility(Visibility visibility)
+        public void ChangeGameVisibility(Visibility visibility)
         {
             Score.Visibility = visibility;
-            HiScore.Visibility = visibility;
             BulletAmount.Visibility = visibility;
             Map.Visibility = visibility;
             Ground.Visibility = visibility;
@@ -427,14 +430,6 @@ namespace Jump
 
         // SCORE //
 
-        public void getHiScore()
-        {
-            using var load = new StreamReader(pathsave);
-            hiscore = int.Parse(load.ReadToEnd());
-            HiScore.Text = "Highest Score: " + hiscore;
-            load.Close();
-        }
-
         public void ScoreUp(int amountscore)
         {
             if (IsQuit) return;
@@ -442,22 +437,6 @@ namespace Jump
 
             score += amountscore;
             Score.Text = "Score: " + score;
-
-            if (score < hiscore) return;
-
-            if (!IsBreakHiScore)
-            {
-                string pathbreakHiscore = pathsound + "breakhiscore.mp3";
-                VoicePlay(pathbreakHiscore);
-            }
-            IsBreakHiScore = true;
-
-            using var rewrite = new StreamWriter(pathsave, false);
-            hiscore = score;
-            HiScore.Text = "Highest Score: " + hiscore;
-
-            rewrite.Write(hiscore);
-            rewrite.Close();
         }
 
         public void ScoreUpType(Entity entity)
@@ -571,7 +550,6 @@ namespace Jump
             
             await Task.Delay(500);
             
-            getHiScore();
             ShowMoney();
             AmountBullet();
 
@@ -595,7 +573,7 @@ namespace Jump
 
                 if (InShopnInven)
                 {
-                    ToShop();
+                    ReadyToShop();
                     return;
                 }
 
@@ -621,7 +599,7 @@ namespace Jump
 
                 if (changetime % 3 != 0 || changetime == 0)
                 {
-                    if (!InShopnInven) await setphase.ChangePhase();
+                    if (InShopnInven) await setphase.ChangePhase();
                 }
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
@@ -1060,7 +1038,7 @@ namespace Jump
 
         // KEY COMMAND //
 
-        private void ReplayKey(object sender, KeyEventArgs e)
+        public void ReplayKey(object sender, KeyEventArgs e)
         {
             Key key = e.Key;
             if (key == Key.R)
@@ -1094,7 +1072,7 @@ namespace Jump
             }
         }
 
-        private void KeyCommand(object sender, KeyEventArgs e)
+        public void KeyCommand(object sender, KeyEventArgs e)
         {
             if (player.IsDead) return;
 
@@ -1146,7 +1124,7 @@ namespace Jump
             }
         }
 
-        private void ReleaseKey(object sender, KeyEventArgs e)
+        public void ReleaseKey(object sender, KeyEventArgs e)
         {
             Key key = e.Key;
             if (IsPause)
@@ -1317,32 +1295,9 @@ namespace Jump
 
         // OUT SHOP //
 
-        public void CreateButtonPlay()
+        public async void ContinueToGame(ShopnInven shopnninven)
         {
-            Button play = new Button()
-            {
-                Height = 100,
-                Width = 103,
-                Margin = new Thickness(0, 530, 1000, 0),
-                Content = new Image
-                {
-                    Source = new BitmapImage(new(pathpic + "go.png")),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Stretch = Stretch.Fill,
-                },
-                Name = "ContinuetoGame",
-            };
-
-            RegisterName(play.Name, play);
-
-            play.Click += ContinueToGame;
-
-            Playground.Children.Add(play);
-        }
-
-        public async void ContinueToGame(object sender, RoutedEventArgs e)
-        {
-            DeleteShopnInvenElement();
+            Playground.Children.Remove(shopnninven);
 
             await ChangeMap();
             IsChangeMap = true;
@@ -1353,9 +1308,7 @@ namespace Jump
             ChangeGameVisibility(Visibility.Visible);
             ArmorVisibility(Visibility.Visible);
 
-            player.crouch = false;
-            player.setDefault();
-            player.Default();
+            RestartPlayer();
             player.playershape.Visibility = Visibility.Visible;
 
             try
@@ -1370,53 +1323,9 @@ namespace Jump
             }
         }
 
-        public void DeleteShopnInvenElement()
-        {
-            TabControl shopninven = (TabControl)Playground.FindName("ShopandInventory");
-            Button play = (Button)Playground.FindName("ContinuetoGame");
-            TextBlock mymoney = (TextBlock)Playground.FindName("MyMoney");
-
-            UnregisterName(shopninven.Name);
-            UnregisterName(play.Name);
-            UnregisterName(mymoney.Name);
-            UnregisterName("Inventory");
-
-            Playground.Children.Remove(shopninven);
-            Playground.Children.Remove(play);
-            Playground.Children.Remove(mymoney);
-        }
-
         // SHOP AND INVENTORY //
 
-        public void ShowMyMoney()
-        {
-            TextBlock mymoney = (TextBlock)Playground.FindName("MyMoney");
-
-            mymoney.Text = Convert.ToString("$" + money);
-        }
-
-        public void MyMoney()
-        {
-            TextBlock mymoney = new TextBlock()
-            {
-                Height = 55,
-                Width = 204,
-                Foreground = Brushes.Green,
-                FontWeight = FontWeights.Bold,
-                FontSize = 30,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(788, 0, 0, 550),
-                Name = "MyMoney"
-            };
-
-            RegisterName(mymoney.Name, mymoney);
-
-            ShowMyMoney();
-            
-            Playground.Children.Add(mymoney);
-        }
-
-        public async void ToShop()
+        public async void ReadyToShop()
         {
             InShopnInven = true;
             InShop = true;
@@ -1434,216 +1343,17 @@ namespace Jump
             backgroundpath = pathpic + "shopshiba.jpg";
             await BlackScreenChanging();
 
-            CreateShopDisplay();
-            CreateButtonPlay();
-            MyMoney();
+            ToShop();
+        }
 
+        public void ToShop()
+        {
             themepath = pathsound + "ireallywannastayatyourhouse.mp3";
             PlayTheme(themepath, 0.4);
-        } 
 
-        public void CreateShopDisplay()
-        {
-            TabControl shopninven = new TabControl()
-            {
-                TabStripPlacement = Dock.Left,
-                Background = Brushes.Black,
-                Name = "ShopandInventory",
-            };
-
-            RegisterName(shopninven.Name, shopninven);
-
-            shopninven.SelectionChanged += UpdateInventory;
-
-            CreateShopnInvenButton(shopninven);
+            ShopnInven shopninven = new ShopnInven(this);
 
             Playground.Children.Add(shopninven);
-        }
-
-        public void CreateShopnInvenButton(TabControl shopninven)
-        {
-            TabItem shop = new TabItem()
-            {
-                Height = 100,
-                Width = 100,
-                Background = Brushes.Black,
-                Content = CreateWeaponStalls(),
-                Header = CreateShopButton(),
-            };
-
-
-            TabItem inventory = new TabItem()
-            {
-                Height = 100,
-                Width = 100,
-                Background = Brushes.Black,
-                Content = CreateInventory(),
-                Header = CreateInventoryButton(),
-            };
-
-            shopninven.Items.Add(shop);
-            shopninven.Items.Add(inventory);
-        }
-
-        public Image CreateShopButton()
-        {      
-            Image img = new Image()
-            {
-                Source = new BitmapImage(new(pathpic + "shop.jpg")),
-                Stretch = Stretch.Fill,
-            };
-
-            return img;
-        }
-
-        public Image CreateInventoryButton()
-        {
-            Image img = new Image()
-            {
-                Source = new BitmapImage(new(pathpic + "inventory.jpg")),
-                Stretch = Stretch.Fill,
-            };
-
-            return img;
-        }
-
-            // SHOP //
-
-        public StackPanel CreateWeaponStalls()
-        {
-            StackPanel weaponstalls = new StackPanel()
-            {
-                Width = 900,
-                Height = 650,
-                Background = new ImageBrush()
-                {
-                    ImageSource = new BitmapImage(new(pathpic + "shopbackground.png")),
-                    Stretch = Stretch.Fill,
-                },
-            };
-
-            AddStalls(weaponstalls);
-
-            return weaponstalls;
-        }
-
-        public void AddStalls(StackPanel weaponstalls)
-        {
-            var equipment = CreateEquipmentStalls();
-            var rifle = CreateRifleStalls();
-
-            weaponstalls.Children.Add(equipment);
-            weaponstalls.Children.Add(rifle);
-
-            ItemEquipmentStalls(equipment);
-            ItemRifleStalls(rifle);
-        }
-
-        public StackPanel CreateEquipmentStalls()
-        {
-            StackPanel equipment = new StackPanel()
-            {
-                Width = 900,
-                Height = 325,
-                Orientation = Orientation.Horizontal,
-                Background = Brushes.Transparent,
-            };
-            return equipment;
-        }
-
-        public StackPanel CreateRifleStalls()
-        {
-            StackPanel rifle = new StackPanel()
-            {
-                Width = 900,
-                Height = 325,
-                Orientation = Orientation.Horizontal,
-                Background = Brushes.Transparent,
-            };
-            return rifle;
-        }
-
-        public void ItemEquipmentStalls(StackPanel equipmentstalls)
-        {
-            
-
-        }
-
-        public void ItemRifleStalls(StackPanel riflestalls)
-        {
-            AddItemShop("m4a4", riflestalls);
-            AddItemShop("awp", riflestalls);
-        }
-
-        public void AddItemShop(string gunname, StackPanel stalls)
-        {
-            Inventory newitem = new Inventory()
-            {
-                name = gunname,
-                main = this,
-                player = this.player,
-            };
-
-            stalls.Children.Add(newitem.Additem(gunname));
-        }
-
-            // INVENTORY //
-        
-        public StackPanel CreateInventory()
-        {
-            StackPanel inventory = new StackPanel()
-            {
-                Width = 900,
-                Height = 650,
-                Orientation = Orientation.Horizontal,
-                Background = new ImageBrush()
-                {
-                    ImageSource = new BitmapImage(new(pathpic + "inventorybackground.jpg")),
-                    Stretch = Stretch.Fill,
-                },
-                Name = "Inventory"
-            };
-
-            RegisterName(inventory.Name, inventory);
-
-            return inventory;
-        }
-
-        public void AddItemInventory()
-        {
-            StackPanel inventory = (StackPanel)Playground.FindName("Inventory");
-
-            inventory.Children.Clear();
-
-            foreach (var item in player.inventory)
-            {
-                Inventory newitem = new Inventory()
-                {
-                    IsBuy = true,
-                    name = item,
-                    player = this.player,
-                    main = this
-                };
-
-                inventory.Children.Add(newitem.Additem(item));
-            }
-        }
-
-        public void UpdateInventory(object sender, SelectionChangedEventArgs e)
-        {
-            TabControl shopninven = (TabControl)sender;
-
-            if (shopninven.SelectedIndex == 1)
-            {
-                InInventory = true;
-                InShop = false;
-                AddItemInventory();
-            }
-            else
-            {
-                InShop = true;
-                InInventory = false;
-            }
         }
 
         // PAUSE GAME //

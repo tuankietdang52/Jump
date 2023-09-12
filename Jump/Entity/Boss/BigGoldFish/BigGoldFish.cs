@@ -117,7 +117,7 @@ namespace Jump
 
         public override async Task Action()
         {
-            CreateHealthBar(700);
+            CreateHealthBar(1);
 
             double pos = Canvas.GetLeft(this.entity);
 

@@ -10,7 +10,6 @@
         <Canvas Name="Playground" Background="#FF07EEFF" Width="1000" Height="650">
             <Rectangle HorizontalAlignment="Center" Height="310" Canvas.Left="0" Canvas.Top="346" Stroke="Black" VerticalAlignment="Top" Width="1002" Name="Ground"/>
             <TextBlock x:Name="Score" HorizontalAlignment="Center" Canvas.Left="410" Canvas.Top="410" TextWrapping="Wrap" Text="Score: 0" VerticalAlignment="Top" Height="55" Width="130" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="White"/>
-            <TextBlock x:Name="HiScore" HorizontalAlignment="Center" Canvas.Left="370" Canvas.Top="450" TextWrapping="Wrap" Text="Highest Score: 0" VerticalAlignment="Top" Height="55" Width="208" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
             <TextBlock x:Name="BulletAmount" HorizontalAlignment="Left" Canvas.Left="55" Canvas.Top="430" TextWrapping="Wrap" Text="Bullet: " VerticalAlignment="Top" Height="55" Width="304" FontSize="30" TextAlignment="Left" FontWeight="Bold" Foreground="Yellow"/>
             <TextBlock x:Name="Money" HorizontalAlignment="Left" Canvas.Left="55" Canvas.Top="480" TextWrapping="Wrap" Text="Money: " VerticalAlignment="Top" Height="55" Width="304" FontSize="30" TextAlignment="Left" FontWeight="Bold" Foreground="LightGreen"/>
             <TextBlock x:Name="Map" HorizontalAlignment="Left" Canvas.Left="670" Canvas.Top="430" TextWrapping="Wrap" Text="Map: " VerticalAlignment="Top" Height="55" Width="304" FontSize="30" TextAlignment="Left" FontWeight="Bold" Foreground="Purple"/>
