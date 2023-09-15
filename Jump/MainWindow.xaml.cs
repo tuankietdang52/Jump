@@ -90,6 +90,7 @@ namespace Jump
         public Inventory item = new Inventory();
         public Rectangle? armoricon;
         public HighScore highscore = new HighScore();
+        public List<HighScore.HighScoreOwner> listhighscore = new List<HighScore.HighScoreOwner>();
 
         public MainWindow()
         {
@@ -99,6 +100,7 @@ namespace Jump
 
             CreateGameDisplay();
             MainMenu();
+            GetHighScore();
         }
 
         public void ChangeGameVisibility(Visibility visibility)
@@ -111,6 +113,12 @@ namespace Jump
         }
 
         // PRE START GAME //
+
+        public void GetHighScore()
+        {
+            highscore.InsertScore(10, "kiet");
+            highscore.GetScore(ref listhighscore);
+        }
 
         public void MainMenu()
         {
