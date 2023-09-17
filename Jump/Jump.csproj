@@ -16,6 +16,8 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
+		<Content Remove="Picture\mainbackground.png" />
+		<Content Remove="Picture\shopbackground.png" />
 		<Content Include="HiScore.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -30,6 +32,10 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Resource Include="Picture\mainbackground.png" />
+	  <Resource Include="Picture\shopbackground.png" />
 	</ItemGroup>
 		
 

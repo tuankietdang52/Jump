@@ -30,7 +30,7 @@ using System.Windows.Automation.Provider;
 using System.Security.Policy;
 using System.Windows.Media.Converters;
 using Jump.Sql;
-using Jump.ShopnInvenView;
+using Jump.View;
 
 namespace Jump
 {
@@ -91,6 +91,7 @@ namespace Jump
         public Rectangle? armoricon;
         public HighScore highscore = new HighScore();
         public List<HighScore.HighScoreOwner> listhighscore = new List<HighScore.HighScoreOwner>();
+        public CustomButton custom = new CustomButton();
 
         public MainWindow()
         {
@@ -100,7 +101,6 @@ namespace Jump
 
             CreateGameDisplay();
             MainMenu();
-            GetHighScore();
         }
 
         public void ChangeGameVisibility(Visibility visibility)
@@ -114,106 +114,18 @@ namespace Jump
 
         // PRE START GAME //
 
-        public void GetHighScore()
-        {
-            highscore.InsertScore(10, "kiet");
-            highscore.GetScore(ref listhighscore);
-        }
-
         public void MainMenu()
         {
             string pathmainmenu = pathsound + "Main Theme.mp3";
 
             PlayTheme(pathmainmenu, 1);
 
-            Ground.Visibility = Visibility.Hidden;
-
-            Rectangle Title = new()
-            {
-                Name = "Title",
-                Width = 700,
-                Height = 200,
-                Fill = new ImageBrush
-                {
-                    ImageSource = new BitmapImage(new(pathpic + "Title.png")),
-                    Stretch = Stretch.Fill,
-                },
-            };
-
-            Canvas.SetLeft(Title, 150);
-
-            RegisterName(Title.Name, Title);
-            Playground.Children.Add(Title);
-
-            CreateStartButton();
+            MainMenu mainmenu = new MainMenu(this);
+            Playground.Children.Add(mainmenu);
         }
 
-        public Button CreateButton(string text, string name)
+        public async void PreStartGame()
         {
-            TextBlock txt = new()
-            {
-                FontSize = 25,
-                Text = text,
-
-                Foreground = Brushes.LightSkyBlue,
-                FontWeight = FontWeights.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-
-            Grid stack = new()
-            {
-                Height = 50,
-                Width = 300,
-                Background = new ImageBrush
-                {
-                    ImageSource = new BitmapImage(new(pathpic + "buttonimg.jpg")),
-                    Stretch = Stretch.Fill,
-                }
-            };
-
-            stack.Children.Add(txt);
-
-            Button button = new()
-            {
-                Name = name,
-                Height = 50,
-                Width = 300,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Content = stack
-            };
-
-            return button;
-        }
-
-        private void CreateStartButton()
-        {
-            Button start = CreateButton("START", "Start");
-
-
-            start.Click += PreStartGame;
-
-            RegisterName(start.Name, start);
-
-            Canvas.SetLeft(start, 345);
-            Canvas.SetTop(start, 225);
-
-            Playground.Children.Add(start);
-        }
-
-        private async void PreStartGame(object sender, RoutedEventArgs e)
-        {
-            Rectangle title = (Rectangle)Playground.FindName("Title");
-            Button start = (Button)Playground.FindName("Start");
-
-            Playground.Children.Remove(title);
-            Playground.Children.Remove(start);
-
-            UnregisterName("Title");
-            UnregisterName("Start");
-
-            theme.Stop();
-
             if (!IsQuit) SetPlayer();
             else ShowPlayer();
 
@@ -222,7 +134,7 @@ namespace Jump
 
             ChangeGameVisibility(Visibility.Visible);
 
-            setphase.main = (MainWindow)Main;
+            setphase.main = this;
 
             RestartEntitySpeed();
 
@@ -670,42 +582,11 @@ namespace Jump
 
         // GAME OVER DISPLAY //
 
-        private void CreateDeadTitle()
+        public void PlayerDeadWindow(int phase)
         {
-            Rectangle DeadTitle = new()
-            {
-                Name = "DeadTitle",
-                Width = 900,
-                Height = 400,
-                Fill = new ImageBrush
-                {
-                    ImageSource = new BitmapImage(new(pathpic + "die.png")),
-                    Stretch = Stretch.Fill,
-                },
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Top
-            };
-
-            Canvas.SetLeft(DeadTitle, 40);
-            Canvas.SetTop(DeadTitle, -40);
-
-            RegisterName(DeadTitle.Name, DeadTitle);
-
-            Playground.Children.Add(DeadTitle);
-        }
-        
-        private void CreateButtonReplay()
-        {
-            Button replay = CreateButton("REPLAY", "Replay");
-
-            RegisterName(replay.Name, replay);
-
-            replay.Click += HandleReplay;
-
-            Canvas.SetLeft(replay, 345);
-            Canvas.SetTop(replay, 225);
-
-            Playground.Children.Add(replay);
+            DeadWindow deadwindow = new DeadWindow(this, changetime, score);
+            
+            Playground.Children.Add(deadwindow);
         }
 
         // REPLAY AND GAME OVER //
@@ -751,9 +632,7 @@ namespace Jump
 
             VoicePlay(deadvoice);
 
-            CreateDeadTitle();
-
-            CreateButtonReplay();
+            PlayerDeadWindow(phase);
 
             Main.KeyDown += ReplayKey;
             player.setDefaultDead();
@@ -938,11 +817,7 @@ namespace Jump
                     if (!entity.IsHarmless) ScoreUp(1);
                 }
                 // player get hit //
-                else
-                {
-                    killer = entity;
-                    return;
-                }
+                else return;
             }
 
             if (!player.IsDead) entities.Remove(entity);
@@ -1453,7 +1328,8 @@ namespace Jump
 
         public Button CreateButtonResume()
         {
-            Button resume = CreateButton("RESUME", "Resume");
+            Button resume = new Button();
+            custom.CreateButton("RESUME", ref resume);
 
             resume.Margin = new Thickness(0, 60, 0, 0);
             resume.Click += HandleResume;
@@ -1463,7 +1339,8 @@ namespace Jump
 
         public Button CreateButtonQuit()
         {
-            Button quit = CreateButton("QUIT", "Quit");
+            Button quit = new Button();
+            custom.CreateButton("QUIT", ref quit);
 
             quit.Margin = new Thickness(0, 80, 0, 0);
             quit.Click += Quit;

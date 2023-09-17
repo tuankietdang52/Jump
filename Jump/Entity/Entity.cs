@@ -226,6 +226,7 @@ namespace Jump
                 if (CheckArmor()) return true;
                 if (IsDead) return true;
 
+                main!.killer = this;
                 player!.IsDead = true;
                 return true;
             }

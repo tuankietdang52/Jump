@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Jump.ShopnInvenView
+namespace Jump.View
 {
     public partial class ShopnInven : UserControl
     {
@@ -22,12 +22,12 @@ namespace Jump.ShopnInvenView
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
 
         public MainWindow? main { get; set; }
+        public ShopnInven() { }
         public ShopnInven(MainWindow main)
         {
             InitializeComponent();
             this.main = main;
 
-            SetImg();
             SetShopnInven();
             ShowMyMoney();
         }
@@ -36,63 +36,10 @@ namespace Jump.ShopnInvenView
             main!.ContinueToGame(this);
         }
 
-        public void SetImg()
-        {
-            ButtonPlayImg();
-            ButtonShopImg();
-            ButtonInventoryImg();
-            ShopBackground();
-            InventoryBackground();
-        }
-
         public void SetShopnInven()
         {
             ItemEquipmentStalls();
             ItemRifleStalls();
-        }
-
-        public void ButtonPlayImg()
-        {
-            play.Content = new Image
-            {
-                Source = new BitmapImage(new(pathpic + "go.png")),
-            };
-        }
-
-        public void ButtonShopImg()
-        {
-            shop.Header = new Image
-            {
-                Source = new BitmapImage(new(pathpic + "shop.jpg")),
-                Stretch = Stretch.Fill,
-            };
-        }
-
-        public void ButtonInventoryImg()
-        {
-            inventory.Header = new Image
-            {
-                Source = new BitmapImage(new(pathpic + "inventory.jpg")),
-                Stretch = Stretch.Fill,
-            };
-        }
-
-        public void ShopBackground()
-        {
-            weaponstalls.Background = new ImageBrush
-            {
-                ImageSource = new BitmapImage(new(pathpic + "shopbackground.png")),
-                Stretch = Stretch.Fill,
-            };
-        }
-
-        public void InventoryBackground()
-        {
-            inventoryitem.Background = new ImageBrush
-            {
-                ImageSource = new BitmapImage(new(pathpic + "inventorybackground.jpg")),
-                Stretch = Stretch.Fill,
-            };
         }
 
         public void ShowMyMoney()

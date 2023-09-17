@@ -1,4 +1,4 @@
-﻿using Jump.ShopnInvenView;
+﻿using Jump.View;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;

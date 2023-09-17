@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="Jump.View.ShopnInven"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Jump.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Viewbox Stretch="Fill">
+        <Canvas x:Name="restscreen" Height="650" Width="1000">
+            <Canvas.Background>
+                <ImageBrush ImageSource="/Picture/shopshiba.jpg"/>
+            </Canvas.Background>
+            <TabControl x:Name="ShopnInventory" TabStripPlacement="Left" SelectionChanged="UpdateInventory">
+                <TabItem Height="100" Width="100" Name="shop">
+                    <TabItem.Header>
+                        <Image Source="/Picture/shop.jpg" Stretch="Fill"/>
+                    </TabItem.Header>
+                    <StackPanel x:Name="weaponstalls" Height="650" Width="900">
+                        <StackPanel.Background>
+                            <ImageBrush ImageSource="/Picture/shopbackground.png" />
+                        </StackPanel.Background>
+                        <StackPanel Name="equipment" Height="325" Width="900" Orientation="Horizontal" Background="Transparent"/>
+                        <StackPanel x:Name="rifle" Height="325" Width="900" Orientation="Horizontal" Background="Transparent"/>
+                    </StackPanel>
+                </TabItem>
+                <TabItem x:Name="inventory" Height="100" Width="100" Background="Black">
+                    <TabItem.Header>
+                        <Image Source="/Picture/inventory.jpg" Stretch="Fill"/>
+                    </TabItem.Header>
+                    <StackPanel x:Name="inventoryitem" Width="900" Height="650" Orientation="Horizontal">
+                        <StackPanel.Background>
+                            <ImageBrush ImageSource="/Picture/inventorybackground.jpg"/>
+                        </StackPanel.Background>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+            <Button x:Name="play" Height="100" Width="103" Margin="0, 550, 1000, 0" Click="HandleContinue">
+                <Button.Content>
+                    <Image Source="/Picture/go.png"/>
+                </Button.Content>
+            </Button>
+            <TextBlock x:Name="mymoney" Height="55" Width="204" Foreground="Green" FontWeight="Bold" FontSize="30" TextWrapping="Wrap" Margin="788, 0, 0, 550"/>
+        </Canvas>
+    </Viewbox>
+</UserControl>

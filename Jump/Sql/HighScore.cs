@@ -31,7 +31,7 @@ namespace Jump.Sql
             public int score { get; set; }
         };
 
-        public void InsertScore(int score, string name)
+        public void InsertScore(string name, int score)
         {
             using (var transaction =  connection.BeginTransaction())
             {
@@ -49,6 +49,7 @@ namespace Jump.Sql
             var getscore = connection.CreateCommand();
             getscore.CommandText = @"
                     SELECT * FROM HIGHSCORE
+                    ORDER BY SCORE DESC
                 ";
 
             var highscore = new object[2];
@@ -68,22 +69,6 @@ namespace Jump.Sql
                     listhighscore[index].score = Convert.ToInt32(highscore[1]);
 
                     index++;
-                }
-
-                SortList(ref listhighscore);
-            }
-        }
-
-        public void SortList(ref List<HighScoreOwner> listhighscore)
-        {
-            for (int i = 0; i < listhighscore.Count; i++)
-            {
-                for (int j = i + 1;  j < listhighscore.Count; j++)
-                {
-                    if (listhighscore[i].score > listhighscore[j].score) continue;
-                    var temp = listhighscore[i];
-                    listhighscore[i] = listhighscore[j];
-                    listhighscore[j] = temp;
                 }
             }
         }
