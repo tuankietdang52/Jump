@@ -402,29 +402,13 @@ namespace Jump
             }
         }
 
-        // SOUND AND MUSIC //
+        // THEME //
 
         public void PlayTheme(string path, double volume)
         {
             theme.Open(new (path));
             theme.Volume = volume;
             theme.Play();
-        }
-
-        private void VoiceStart()
-        {
-            Random voicestart = new Random();
-            int voicestartindex = voicestart.Next(1, 10);
-            string pathvoicestart = pathsound + "voicestart" + voicestartindex + ".mp3";
-
-            VoicePlay(pathvoicestart);
-        }
-
-        private void VoicePlay(string path)
-        {
-            voice.Open(new(path));
-            voice.Volume = 1;
-            voice.Play();
         }
 
         private void Looptheme(object sender, EventArgs e)
@@ -436,12 +420,29 @@ namespace Jump
             }
         }
 
+        // GAME SETTING //
+
+        public void KeyCommandManage(string status)
+        {
+            switch (status)
+            {
+                case "on":
+                    Main.KeyDown += KeyCommand;
+                    Main.KeyUp += ReleaseKey;
+                    break;
+
+                case "off":
+                    Main.KeyDown -= KeyCommand;
+                    Main.KeyUp -= ReleaseKey;
+                    break;
+            }
+        }
+
         // GAME START //
         
         public void FirstStartGame()
         {
-            Main.KeyDown += KeyCommand;
-            Main.KeyUp += ReleaseKey;
+            KeyCommandManage("on");
 
             PlayTheme(themepath!, volumeadjust);
         }
@@ -449,18 +450,13 @@ namespace Jump
         public async void GameStart()
         {
             IsQuit = false;
-            if (IsReplay)
-            {
-                GetPathMapandTheme();
-                ChangeBackground();
-                DeleteReplayElement();
-                ChangeMapName("Map: Galaxy", Brushes.Purple);
-            }
 
-            VoiceStart();
+            await Task.Delay(1000);
 
+            player.VoiceStart();
             player.setDefault();
             player.Default();
+
             await Task.Delay(2000);
 
             PlayTheme(themepath!, volumeadjust);
@@ -519,7 +515,7 @@ namespace Jump
 
                 if (changetime % 3 != 0 || changetime == 0)
                 {
-                    if (InShopnInven) await setphase.ChangePhase();
+                    if (!InShopnInven) await setphase.ChangePhase();
                 }
 
                 int elapsedtime = timetochangemov.Elapsed.Seconds;
@@ -547,12 +543,7 @@ namespace Jump
 
                     await Task.Delay(2000);
 
-                    PlayTheme(themepath!, volumeadjust);
-
-                    IsHaveBoss = true;
-
-                    player.IsDead = false;
-                    RestartPlayer();
+                    ToBoss();
 
                     await setphase.ChangePhase();
                 }
@@ -560,6 +551,16 @@ namespace Jump
             }
 
             if (!IsQuit) GameOver();
+        }
+
+        public void ToBoss()
+        {
+            PlayTheme(themepath!, volumeadjust);
+
+            IsHaveBoss = true;
+
+            player.IsDead = false;
+            RestartPlayer();
         }
 
         public void ChangeElementMap()
@@ -582,7 +583,7 @@ namespace Jump
 
         // GAME OVER DISPLAY //
 
-        public void PlayerDeadWindow(int phase)
+        public void PlayerDeadWindow()
         {
             DeadWindow deadwindow = new DeadWindow(this, changetime, score);
             
@@ -591,7 +592,7 @@ namespace Jump
 
         // REPLAY AND GAME OVER //
 
-        public async void GameOver()
+        public void GameOver()
         {
             IsReplay = true;
 
@@ -599,16 +600,9 @@ namespace Jump
 
             Dead();
 
-            string themedead = pathsound + "Bachram.mp3";
-            PlayTheme(themedead, 1);
-
             player.Die(killer);
-            await Task.Delay(10000);
 
             if (!IsReplay) return;
-
-            string themereplay = pathsound + "Melody of Guidance.mp3";
-            PlayTheme(themereplay, 1);
         }
 
         public void RestartEntitySpeed()
@@ -621,35 +615,16 @@ namespace Jump
         {
             player.Die(killer);
 
-            Main.KeyDown -= KeyCommand;
-            Main.KeyUp -= ReleaseKey;
+            KeyCommandManage("off");
 
             if (!player.IsDefaultDead) Thread.Sleep(1000);
 
-            Random voicedead = new Random();
-            int voicedeadindex = voicedead.Next(1, 3);
-            string deadvoice = pathsound + "voicedead" + voicedeadindex + ".mp3";
+            player.GetVoiceDead();
 
-            VoicePlay(deadvoice);
-
-            PlayerDeadWindow(phase);
+            PlayerDeadWindow();
 
             Main.KeyDown += ReplayKey;
             player.setDefaultDead();
-        }
-
-        public void DeleteReplayElement()
-        {
-            Button replay = (Button)Playground.FindName("Replay");
-            Rectangle DeadTitle = (Rectangle)Playground.FindName("DeadTitle");
-
-            Playground.Children.Remove(replay);
-            Playground.Children.Remove(DeadTitle);
-
-            UnregisterName("Replay");
-            UnregisterName("DeadTitle");
-
-            IsReplay = false;
         }
 
         public void ClearEntity()
@@ -692,6 +667,21 @@ namespace Jump
             gun.getPathGun(player.indexgun);
         }
 
+        public void RestartAllEntity()
+        {
+            ClearEntity();
+            RestartPlayer();
+            RestartInventory();
+        }
+
+        public void RestartEquipmentIndex()
+        {
+            Score.Text = "Score: 0";
+            getAmountBullet();
+            AmountBullet();
+            ShowMoney();
+        }
+
         public void RestartElement()
         {
             if (!IsQuit) Main.KeyDown -= ReplayKey;
@@ -702,17 +692,20 @@ namespace Jump
 
             RestartBoolElement();
 
-            Score.Text = "Score: 0";
+            RestartAllEntity();
 
-            ClearEntity();
-            RestartPlayer();
-            RestartInventory();
+            RestartEquipmentIndex();
+        }
 
-            getAmountBullet();
-            AmountBullet();
-            ShowMoney();
+        public async void RestartMap(DeadWindow deadwindow)
+        {
+            UnregisterName("DeadWindow");
+            Playground.Children.Remove(deadwindow);
 
-            theme.Stop();
+            GetPathMapandTheme();
+            await BlackScreenChanging();
+            ChangeBackground();
+            ChangeMapName("Map: Galaxy", Brushes.Purple);
         }
 
         public void RestartBoolElement()
@@ -738,17 +731,14 @@ namespace Jump
             money = 0;
         }
 
-        public void HandleReplay(object sender, RoutedEventArgs e)
+        public void Replay(DeadWindow deadwindow)
         {
-            Replay();
-        }
-
-        public void Replay()
-        {
+            deadwindow.theme.Stop();
             ClearEntity();
 
             RestartElement();
             RestartEntitySpeed();
+            RestartMap(deadwindow);
 
             GameStart();
         }
@@ -776,15 +766,20 @@ namespace Jump
 
         // ENTITY //
 
+        public void SetEntity(ref Entity entity)
+        {
+            entity.player = player;
+            entity.playground = Playground;
+            entity.main = (MainWindow)Main;
+        }
+
         public async Task SpawnEntity(Entity newentity)
         {
             Entity entity;
 
             entity = newentity;
 
-            entity.player = player;
-            entity.playground = Playground;
-            entity.main = (MainWindow)Main;
+            SetEntity(ref entity);
 
             Playground.Children.Add(entity.entity);
             entities.Add(entity);
@@ -792,6 +787,14 @@ namespace Jump
             await entity.Action();
 
             CheckEntity(entity);
+        }
+
+        public void RemoveEntity(Entity entity)
+        {
+            if (IsHaveBoss) CheckBoss(entity);
+            ScoreUpType(entity);
+            GetMoneyType(entity);
+            Playground.Children.Remove(entity.entity);
         }
 
         private void CheckEntity(Entity entity)
@@ -802,10 +805,7 @@ namespace Jump
                 if (!entity.CheckGetHit()) { }
                 else
                 {
-                    if (IsHaveBoss) CheckBoss(entity);
-                    ScoreUpType(entity);
-                    GetMoneyType(entity);
-                    Playground.Children.Remove(entity.entity);
+                    RemoveEntity(entity);
                 }
             }
             else
@@ -930,7 +930,8 @@ namespace Jump
             Key key = e.Key;
             if (key == Key.R)
             {
-                Replay();
+                var deadwindow = (DeadWindow)Playground.FindName("DeadWindow");
+                Replay(deadwindow);
             }
         }
 
@@ -1156,6 +1157,7 @@ namespace Jump
 
             await Task.Delay(500);
             item.PlaySound("awp");
+
             await Task.Delay(800);
             IsShoot = false;
         }
@@ -1202,8 +1204,7 @@ namespace Jump
             await ChangeMap();
             IsChangeMap = true;
 
-            Main.KeyDown += KeyCommand;
-            Main.KeyUp += ReleaseKey;
+            KeyCommandManage("on");
 
             ResetVisibility();
 
@@ -1241,8 +1242,7 @@ namespace Jump
             ClearEntity();
 
             if (player.IsDead) player.IsDead = false;
-            Main.KeyDown -= KeyCommand;
-            Main.KeyUp -= ReleaseKey;
+            KeyCommandManage("off");
 
             InShopVisibility();
 
@@ -1359,8 +1359,7 @@ namespace Jump
             DeletePauseElement();
             if (player.IsHaveArmor) BreakArmor();
 
-            Main.KeyDown -= KeyCommand;
-            Main.KeyUp -= ReleaseKey;
+            KeyCommandManage("off");
 
             player.playershape.Visibility = Visibility.Hidden;
 

@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Jump
 {
@@ -87,6 +88,8 @@ namespace Jump
             Canvas.SetTop(playershape, 215);
         }
 
+        // SOUND AND VOICE //
+
         public void setDefaultDead()
         {
             Canvas.SetLeft(playershape, 130);
@@ -117,13 +120,38 @@ namespace Jump
             sound.Play();
         }
 
+        public void GetVoiceDead()
+        {
+            Random voicedead = new Random();
+            int voicedeadindex = voicedead.Next(1, 3);
+            string deadvoice = pathsound + "voicedead" + voicedeadindex + ".mp3";
+            PlayDeadVoice(deadvoice);
+        }
+
+        public void VoicePlay(string path)
+        {
+            MediaPlayer voice = new MediaPlayer();
+            voice.Open(new(path));
+            voice.Volume = 1;
+            voice.Play();
+        }
+
+        public void VoiceStart()
+        {
+            Random voicestart = new Random();
+            int voicestartindex = voicestart.Next(1, 10);
+            string pathvoicestart = pathsound + "voicestart" + voicestartindex + ".mp3";
+
+            VoicePlay(pathvoicestart);
+        }
+
+        // SET PLAYER //
+
         public void setElement(int height, int width)
         {
             playershape.Height = height;
             playershape.Width = width;
         }
-
-        // SET PLAYER //
 
         private void ChangeSprite(string path)
         {

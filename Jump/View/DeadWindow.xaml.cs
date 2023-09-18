@@ -24,6 +24,7 @@ namespace Jump.View
 
         public MainWindow? main { get; set; }
         public ScoreBar scorebar = new ScoreBar();
+        public MediaPlayer theme = new MediaPlayer();
 
         public int mapindex { get; set; }
         public int score { get; set; }
@@ -39,16 +40,31 @@ namespace Jump.View
             UpdateScore();
             SetWindow();
             ShowWindow();
+            SetName();
+        }
+
+        public void SetName()
+        {
+            this.Name = "DeadWindow";
+            main!.RegisterName(this.Name, this);
         }
 
         public async void ShowWindow()
         {
+            PlayTheme("Melody of Guidance.mp3");
             Dead.Opacity = 0;
             while (Dead.Opacity < 1)
             {
                 Dead.Opacity += 0.1;
                 await Task.Delay(80);
             }
+        }
+
+        public void PlayTheme(string themedead)
+        {
+            theme.Open(new(pathsound + themedead));
+            theme.Volume = 1;
+            theme.Play();
         }
 
         public void SetWindow()
@@ -76,11 +92,6 @@ namespace Jump.View
             };
         }
 
-        public void CreateButtonQuit()
-        {
-            CustomButton custom = new CustomButton();
-            custom.CreateButton("QUIT", ref Quit, 135, 50);
-        }
 
         public void GetNameMap()
         {
@@ -159,10 +170,22 @@ namespace Jump.View
             };
         }
 
+        public void CreateButtonQuit()
+        {
+            CustomButton custom = new CustomButton();
+            custom.CreateButton("QUIT", ref Quit, 135, 50);
+        }
+
         public void CreateButtonReplay()
         {
             CustomButton custom = new CustomButton();
             custom.CreateButton("REPLAY", ref Replay, 135, 50);
+            Replay.Click += HandleReplay;
+        }
+
+        public void HandleReplay(object sender, RoutedEventArgs e)
+        {
+            main!.Replay(this);
         }
 
         public void UpdateScore()
