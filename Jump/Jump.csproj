@@ -16,12 +16,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
-		<Content Remove="Picture\mainbackground.png" />
-		<Content Remove="Picture\shopbackground.png" />
-		<Content Include="HiScore.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
+		<Content Remove="Picture\mainbackground.png"/>
+		<Content Remove="Picture\shopbackground.png"/>
+		
 		<Content Include="How to play.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

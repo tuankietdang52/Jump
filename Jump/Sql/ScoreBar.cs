@@ -27,6 +27,11 @@ namespace Jump.Sql
         public List<HighScore.HighScoreOwner> listhighscore = new List<HighScore.HighScoreOwner>();
         public ScoreBar()
         {
+            GetScore();
+        }
+
+        public void GetScore()
+        {
             highscore.GetScore(ref listhighscore);
         }
 

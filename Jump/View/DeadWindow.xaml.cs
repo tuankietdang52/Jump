@@ -24,7 +24,9 @@ namespace Jump.View
 
         public MainWindow? main { get; set; }
         public ScoreBar scorebar = new ScoreBar();
-        public MediaPlayer theme = new MediaPlayer();
+        public HighScore highscore = new HighScore();
+
+        public bool IsSaveScore = false;
 
         public int mapindex { get; set; }
         public int score { get; set; }
@@ -51,7 +53,6 @@ namespace Jump.View
 
         public async void ShowWindow()
         {
-            PlayTheme("Melody of Guidance.mp3");
             Dead.Opacity = 0;
             while (Dead.Opacity < 1)
             {
@@ -60,17 +61,11 @@ namespace Jump.View
             }
         }
 
-        public void PlayTheme(string themedead)
-        {
-            theme.Open(new(pathsound + themedead));
-            theme.Volume = 1;
-            theme.Play();
-        }
-
         public void SetWindow()
         {
             CreateButtonQuit();
             CreateButtonReplay();
+            CreateButtonSave();
             GetNameMap();
             GetCurrentScore();
             GetKillerImg();
@@ -91,7 +86,6 @@ namespace Jump.View
                 Stretch = Stretch.Fill,
             };
         }
-
 
         public void GetNameMap()
         {
@@ -174,6 +168,12 @@ namespace Jump.View
         {
             CustomButton custom = new CustomButton();
             custom.CreateButton("QUIT", ref Quit, 135, 50);
+            Quit.Click += HandleQuit;
+        }
+
+        public void HandleQuit(object sender, RoutedEventArgs e)
+        {
+            main!.Quit(this);
         }
 
         public void CreateButtonReplay()
@@ -188,9 +188,52 @@ namespace Jump.View
             main!.Replay(this);
         }
 
+        public void CreateButtonSave()
+        {
+            CustomButton custom = new CustomButton();
+            custom.CreateButton("SAVE", ref Save, 95, 50);
+            Save.Click += HandleSave;
+        }
+
+        public void NonEditScoreType()
+        {
+            ScoreType.IsReadOnly = true;
+            SaveScoreTxt.Text = "Score Saved";
+            SaveScoreTxt.Foreground = Brushes.LightGreen;
+        }
+
+        private void TypeText(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            main!.KeySettingOff();
+            main.KeyDown -= main.ReplayKey;
+        }
+
+        private void DoneType(object sender, RoutedEventArgs e)
+        {
+            Keyboard.Focus(this);
+            main!.KeyDown += main.ReplayKey;
+        }
+
+        public void HandleSave(object sender, RoutedEventArgs e)
+        {
+            if (IsSaveScore) return;
+            if (ScoreType.Text.Length >= 8)
+            {
+                MessageBox.Show("adu man?");
+                return;
+            }
+
+            IsSaveScore = true;
+            NonEditScoreType();
+
+            highscore.InsertScore(ScoreType.Text, score);
+            UpdateScore();
+        }
+
         public void UpdateScore()
         {
             ListScore.Items.Clear();
+            scorebar.GetScore();
             for (int index = 0; index < scorebar.listhighscore.Count; index++)
             {
                 ListScore.Items.Add(scorebar.CreateScoreBar(index));

@@ -10,7 +10,7 @@
     <Viewbox Stretch="Fill">
         <Canvas Width="1000" Height="650" x:Name="Dead">
             <Rectangle Width="1000" Height="650" Focusable="False" Fill="Black" Opacity="0.5"/>
-            <TextBlock x:Name="Score" Height="84" Width="256" HorizontalAlignment="Center" VerticalAlignment="Top" TextWrapping="Wrap" TextAlignment="Center" FontSize="30" Canvas.Left="372" Canvas.Top="44">
+            <TextBlock x:Name="Score" Height="84" Width="256" HorizontalAlignment="Center" VerticalAlignment="Top" TextWrapping="Wrap" TextAlignment="Center" FontSize="30" Canvas.Left="372" Canvas.Top="131">
                 <TextBlock.Foreground>
                     <SolidColorBrush Color="White"/>
                 </TextBlock.Foreground>
@@ -43,6 +43,18 @@
                     <ImageBrush ImageSource="/Picture/ScoreBg.png"/>
                 </TextBlock.Background>
             </TextBlock>
+            <Rectangle x:Name="DieTitle" Height="378" Width="632" Canvas.Left="184" Canvas.Top="-120" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="/Picture/die.png" Stretch="Fill"/>
+                </Rectangle.Fill>
+            </Rectangle>
+            <TextBlock x:Name="SaveScoreTxt" Text="Save Your Score (8 or less character):" Height="68" Width="419" Canvas.Left="304" Canvas.Top="525" TextWrapping="Wrap" TextAlignment="Left" FontSize="25" Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <TextBox x:Name="ScoreType" FontSize="35" FontWeight="Bold" Foreground="LightSkyBlue" Width="300" Height="50" Canvas.Left="304" Canvas.Top="568" HorizontalAlignment="Left" VerticalAlignment="Center" GotKeyboardFocus="TypeText" LostFocus="DoneType">
+                <TextBox.Background>
+                    <ImageBrush ImageSource="/Picture/ScoreBg.png"/>
+                </TextBox.Background>
+            </TextBox>
+            <Button x:Name="Save" Width="95" Height="50" Canvas.Left="609" Canvas.Top="568" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Canvas>
     </Viewbox>
 </UserControl>

@@ -31,6 +31,7 @@ using System.Security.Policy;
 using System.Windows.Media.Converters;
 using Jump.Sql;
 using Jump.View;
+using System.Windows.Interop;
 
 namespace Jump
 {
@@ -69,6 +70,7 @@ namespace Jump
         public bool InShopnInven = false;
         public bool InShop = false;
         public bool InInventory = false;
+        public bool IsClickReplay = false;
 
         private readonly string pathsave = $"{Directory.GetCurrentDirectory()}\\HiScore.txt";
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
@@ -78,19 +80,26 @@ namespace Jump
         public string? undergroundpath;
         public string? themepath;
 
-        public Entity killer = new Entity();
-        public Stopwatch timetochangemov = new Stopwatch();
         public PlayerCharacter player = new PlayerCharacter();
+        public Gun gun = new Gun();
+
+        public Entity killer = new Entity();
+        public Inventory item = new Inventory();
+
+        public Stopwatch timetochangemov = new Stopwatch();
+        public Phase setphase = new Phase();
+
         public MediaPlayer theme = new MediaPlayer();
         public MediaPlayer voice = new MediaPlayer();
+
         public ListEntity changeentity = new ListEntity();
-        public Gun gun = new Gun();
         public List<Entity> entities = new List<Entity>();
-        public Phase setphase = new Phase();
-        public Inventory item = new Inventory();
-        public Rectangle? armoricon;
-        public HighScore highscore = new HighScore();
+        public List<Item> items = new List<Item>();
         public List<HighScore.HighScoreOwner> listhighscore = new List<HighScore.HighScoreOwner>();
+        
+        public Rectangle? armoricon;
+
+        public HighScore highscore = new HighScore();
         public CustomButton custom = new CustomButton();
 
         public MainWindow()
@@ -352,7 +361,7 @@ namespace Jump
 
         public void ScoreUp(int amountscore)
         {
-            if (IsQuit) return;
+            if (IsQuit || IsReplay) return;
             GunScore(ref amountscore);
 
             score += amountscore;
@@ -438,10 +447,17 @@ namespace Jump
             }
         }
 
+        public void KeySettingOff()
+        {
+            Main.KeyDown -= PauseKey;
+            Main.KeyDown -= ReplayKey;
+        }
+
         // GAME START //
         
         public void FirstStartGame()
         {
+            KeySettingOff();
             KeyCommandManage("on");
 
             PlayTheme(themepath!, volumeadjust);
@@ -450,6 +466,7 @@ namespace Jump
         public async void GameStart()
         {
             IsQuit = false;
+            IsReplay = false;
 
             await Task.Delay(1000);
 
@@ -485,7 +502,7 @@ namespace Jump
                     continue;
                 }
 
-                if (IsQuit) return;
+                if (IsQuit || IsReplay) return;
 
                 if (InShopnInven)
                 {
@@ -550,7 +567,7 @@ namespace Jump
 
             }
 
-            if (!IsQuit) GameOver();
+            if (!IsQuit && !IsReplay) GameOver();
         }
 
         public void ToBoss()
@@ -594,15 +611,15 @@ namespace Jump
 
         public void GameOver()
         {
-            IsReplay = true;
-
+            IsClickReplay = false;
             theme.Stop();
+
+            string deadtheme = pathsound + "Melody of Guidance.mp3";
+            PlayTheme(deadtheme, 1);
 
             Dead();
 
             player.Die(killer);
-
-            if (!IsReplay) return;
         }
 
         public void RestartEntitySpeed()
@@ -643,11 +660,21 @@ namespace Jump
             entities.Clear();
         }
 
+        public void ClearItem()
+        {
+            foreach (var item in items)
+            {
+                Playground.Children.Remove(item.item);
+            }
+
+            items.Clear();
+        }
+
         public void RestartPlayer()
         {
             player.setDefault();
 
-            if (player.IsDead || IsQuit)
+            if (player.IsDead || IsQuit || IsReplay)
             {
                 player.IsHaveArmor = false;
                 player.IsHaveAwp = false;
@@ -670,6 +697,8 @@ namespace Jump
         public void RestartAllEntity()
         {
             ClearEntity();
+            ClearItem();
+
             RestartPlayer();
             RestartInventory();
         }
@@ -682,9 +711,10 @@ namespace Jump
             ShowMoney();
         }
 
-        public void RestartElement()
+        public void Restart()
         {
-            if (!IsQuit) Main.KeyDown -= ReplayKey;
+            KeySettingOff();
+            KeyCommandManage("off");
 
             timetochangemov.Restart();
 
@@ -697,10 +727,26 @@ namespace Jump
             RestartEquipmentIndex();
         }
 
-        public async void RestartMap(DeadWindow deadwindow)
+        public void UnregisterNameWindow(UserControl window)
         {
-            UnregisterName("DeadWindow");
-            Playground.Children.Remove(deadwindow);
+            switch (window)
+            {
+                case DeadWindow:
+                    UnregisterName("DeadWindow");
+                    break;
+
+                case Pause:
+                    UnregisterName("Pause");
+                    break;
+
+                default:
+                    return;
+            }
+        }
+
+        public async void RestartMap(UserControl window)
+        {
+            Playground.Children.Remove(window);
 
             GetPathMapandTheme();
             await BlackScreenChanging();
@@ -731,14 +777,17 @@ namespace Jump
             money = 0;
         }
 
-        public void Replay(DeadWindow deadwindow)
+        public void Replay(UserControl window)
         {
-            deadwindow.theme.Stop();
-            ClearEntity();
+            IsReplay = true;
+            IsPause = false;
 
-            RestartElement();
+            UnregisterNameWindow(window);
+            theme.Stop();
+
+            Restart();
             RestartEntitySpeed();
-            RestartMap(deadwindow);
+            RestartMap(window);
 
             GameStart();
         }
@@ -862,6 +911,7 @@ namespace Jump
             };
 
             Playground.Children.Add(mag.item);
+            items.Add(mag);
 
             await mag.Move();
 
@@ -873,6 +923,7 @@ namespace Jump
             }
 
             Playground.Children.Remove(mag.item);
+            items.Remove(mag);
         }
 
             // ARMOR //
@@ -887,6 +938,7 @@ namespace Jump
             };
 
             Playground.Children.Add(armor.item);
+            items.Add(armor);
 
             await armor.Move();
 
@@ -900,9 +952,10 @@ namespace Jump
             }
 
             Playground.Children.Remove(armor.item);
+            items.Add(armor);
         }
 
-        public void BreakArmor()
+        public void BreakArmorUI()
         {
             player.IsDead = false;
             player.IsHaveArmor = false;
@@ -927,28 +980,23 @@ namespace Jump
 
         public void ReplayKey(object sender, KeyEventArgs e)
         {
+            if (IsQuit || IsReplay) return;
             Key key = e.Key;
             if (key == Key.R)
             {
-                var deadwindow = (DeadWindow)Playground.FindName("DeadWindow");
-                Replay(deadwindow);
+                ReplayKeyHandle();
+                IsClickReplay = true;
             }
         }
 
-        public void ResumeKey(Key key)
+        public void ReplayKeyHandle()
         {
-            if (key == Key.P)
-            {
-                IsPause = false;
-                Resume();
+            if (IsClickReplay) return;
+            UserControl window;
+            if (player.IsDead) window = (DeadWindow)Playground.FindName("DeadWindow");
+            else window = (Pause)Playground.FindName("Pause");
 
-                var playertop = Canvas.GetTop(player.playershape);
-                if (playertop >= 250 && !IsCrouch)
-                {
-                    player.setDefault();
-                    player.Default();
-                }
-            }
+            Replay(window);
         }
 
         public void CheckCrouchPause(Key key)
@@ -960,18 +1008,29 @@ namespace Jump
             }
         }
 
+        public void PauseKey(object sender, KeyEventArgs e)
+        {
+            Main.KeyDown -= ReplayKey;
+            if (IsQuit) return;
+            Key key = e.Key;
+
+            CheckCrouchPause(key);
+
+            switch (key)
+            {
+                case Key.P:
+                    var window = (Pause)Playground.FindName("Pause");
+                    Resume(window);
+                    break;
+            }
+        }
+
         public void KeyCommand(object sender, KeyEventArgs e)
         {
             if (player.IsDead) return;
 
+            e.Handled = true;
             Key key = e.Key;
-
-            if (IsPause)
-            {
-                CheckCrouchPause(key);
-                ResumeKey(key);
-                return;
-            }
 
             switch (key)
             {
@@ -999,7 +1058,6 @@ namespace Jump
                 default:
                     return;
             }
-           
         }
 
         public void ReleaseCrouchPause(Key key)
@@ -1242,6 +1300,7 @@ namespace Jump
             ClearEntity();
 
             if (player.IsDead) player.IsDead = false;
+            KeySettingOff();
             KeyCommandManage("off");
 
             InShopVisibility();
@@ -1266,131 +1325,57 @@ namespace Jump
 
         public void HandlePause()
         {
-            if (!InShopnInven && !player.IsDead)
-            {
-                IsPause = true;
-                CreateBlackScreen();
-                ButtonInPause();
-            }
-        }
-        
-        public void CreateBlackScreen()
-        {
-            Rectangle blackscreen = new Rectangle()
-            {
-                Height = 664,
-                Width = 1002,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Focusable = false,
-                Name = "BlackScreen",
-            };
+            if (InShopnInven && player.IsDead) return;
 
-            RegisterName(blackscreen.Name, blackscreen);
+            IsPause = true;
+            Pause pausewindow = new Pause(this);
+            Playground.Children.Add(pausewindow);
 
-            SolidColorBrush black = new SolidColorBrush();
-            black.Color = Colors.Black;
-
-            blackscreen.Fill = black;
-            blackscreen.Fill.Opacity = 0.4;
-
-            Playground.Children.Add(blackscreen);
+            KeyCommandManage("off");
+            Main.KeyUp += ReleaseKey;
+            Main.KeyDown += PauseKey;
         }
 
-        public void ButtonInPause()
+        // QUIT //
+
+        public void Quit(UserControl window)
         {
-            StackPanel buttoninpause = new StackPanel()
-            {
-                Height = 650,
-                Width = 350,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Name = "ButtonsInPause",
-            };
+            KeySettingOff();
+            KeyCommandManage("off");
 
-            Canvas.SetLeft(buttoninpause, 345);
-
-            RegisterName(buttoninpause.Name, buttoninpause);
-
-            AddButtonToPause(buttoninpause);
-
-            Playground.Children.Add(buttoninpause);
-        }
-
-        public void AddButtonToPause(StackPanel buttoninpause)
-        {
-            var resume = CreateButtonResume();
-            var quit = CreateButtonQuit();
-
-            buttoninpause.Children.Add(resume);
-            buttoninpause.Children.Add(quit);
-        }
-
-        public Button CreateButtonResume()
-        {
-            Button resume = new Button();
-            custom.CreateButton("RESUME", ref resume);
-
-            resume.Margin = new Thickness(0, 60, 0, 0);
-            resume.Click += HandleResume;
-
-            return resume;
-        }
-
-        public Button CreateButtonQuit()
-        {
-            Button quit = new Button();
-            custom.CreateButton("QUIT", ref quit);
-
-            quit.Margin = new Thickness(0, 80, 0, 0);
-            quit.Click += Quit;
-
-            return quit;
-        }
-
-            // QUIT //
-
-        public void Quit(object sender, RoutedEventArgs e)
-        {
             IsQuit = true;
             IsPause = false;
 
-            RestartElement();
-            DeletePauseElement();
-            if (player.IsHaveArmor) BreakArmor();
-
-            KeyCommandManage("off");
+            Playground.Children.Remove(window);
+            if (player.IsHaveArmor) BreakArmorUI();
 
             player.playershape.Visibility = Visibility.Hidden;
 
             ChangeGameVisibility(Visibility.Hidden);
 
+            UnregisterNameWindow(window);
+            Restart();
             CreateGameDisplay();
             MainMenu();
         }
 
             // RESUME //
 
-        public void HandleResume(object sender, RoutedEventArgs e)
+        public void Resume(UserControl window)
         {
-            ResumeKey(Key.P);
-        }
+            Playground.Children.Remove(window);
+            UnregisterNameWindow(window);
+            IsPause = false;
 
-        public void Resume()
-        {
-            DeletePauseElement();
-        }
+            var playertop = Canvas.GetTop(player.playershape);
+            if (playertop >= 250 && !IsCrouch)
+            {
+                player.setDefault();
+                player.Default();
+            }
 
-        public void DeletePauseElement()
-        {
-            Rectangle blackscreen = (Rectangle)Playground.FindName("BlackScreen");
-            StackPanel buttoninpause = (StackPanel)Playground.FindName("ButtonsInPause");
-
-            Playground.Children.Remove(blackscreen);
-            Playground.Children.Remove(buttoninpause);
-
-            UnregisterName(blackscreen.Name);
-            UnregisterName(buttoninpause.Name);
+            KeySettingOff();
+            KeyCommandManage("on");
         }
     }
 }

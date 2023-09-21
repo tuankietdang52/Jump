@@ -238,7 +238,7 @@ namespace Jump
             if (player!.IsHaveArmor)
             {
                 player.IsHaveArmor = false;
-                main!.BreakArmor();
+                main!.BreakArmorUI();
                 return true;
             }
             return false;
