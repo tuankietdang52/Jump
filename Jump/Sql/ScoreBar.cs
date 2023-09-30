@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Jump.Sql
 {
@@ -35,28 +36,32 @@ namespace Jump.Sql
             highscore.GetScore(ref listhighscore);
         }
 
-        public Canvas CreateScoreBar(int index)
+        public Border CreateScoreBar(int index, double width)
         {
-            Canvas scorebar = new Canvas()
+            Border scorebar = new Border();
+            scorebar.BorderBrush = Brushes.Red;
+            scorebar.BorderThickness = new Thickness(5);
+            scorebar.Margin = new Thickness(-5, 0, 0, 0);
+
+            Canvas scorebarcontent = new Canvas()
             {
-                Width = 250,
+                Width = width,
                 Height = 40,
-                Margin = new Thickness(0, 0, 0, 0),
-                Background = new ImageBrush
-                {
-                    ImageSource = new BitmapImage(new(pathpic + "ScoreBg.png")),
-                },
             };
 
-            var name = CreateName(index);
-            var score = CreateScore(index);
 
-            scorebar.Children.Add(name);
-            scorebar.Children.Add(score);
+            var name = CreateName(index, width);
+            var score = CreateScore(index, width);
+
+            scorebarcontent.Children.Add(name);
+            scorebarcontent.Children.Add(score);
+
+            scorebar.Child = scorebarcontent;
+
             return scorebar;
         }
 
-        private TextBlock CreateName(int index)
+        private TextBlock CreateName(int index, double width)
         {
             TextBlock name = new TextBlock()
             {
@@ -71,7 +76,7 @@ namespace Jump.Sql
             return name;
         }
 
-        private TextBlock CreateScore(int index)
+        private TextBlock CreateScore(int index, double width)
         {
             TextBlock score = new TextBlock()
             {
@@ -84,7 +89,7 @@ namespace Jump.Sql
                 FontWeight = FontWeights.Bold,
             };
 
-            Canvas.SetLeft(score, 150);
+            Canvas.SetLeft(score, width - 100);
 
             return score;
         }

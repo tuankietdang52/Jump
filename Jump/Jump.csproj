@@ -15,17 +15,11 @@
 		<Content Include="Sound/**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-		<Content Remove="Picture\mainbackground.png"/>
-		<Content Remove="Picture\shopbackground.png"/>
-		
+		</Content>		
 		<Content Include="How to play.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
-	</ItemGroup>
-	<ItemGroup>
-	  <None Remove="dirt.png" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />

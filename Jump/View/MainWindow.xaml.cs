@@ -31,7 +31,7 @@ using System.Security.Policy;
 using System.Windows.Media.Converters;
 using Jump.Sql;
 using Jump.View;
-using System.Windows.Interop;
+using Jump.EnemyEntity;
 
 namespace Jump
 {
@@ -45,18 +45,9 @@ namespace Jump
         public int limitchangetime = 9;
 
         public int money = 20000;
-        public int score = 0;
-        public int hiscore;
-        public int bulletAmount;
-        public int bulletlimit;
-        public int magazinebullet;
-        public int magazinebulletlimit;
+        public int score = 200;
         public double volumeadjust = 0.2;
 
-        public bool IsJump = false;
-        public bool IsShoot = false;
-        public bool IsCrouch = false;
-        public bool IsReload = false;
         public bool IsBreakHiScore = false;
         public bool IsReplay = false;
         public bool IsHoldCtrlLeft = false;
@@ -71,6 +62,7 @@ namespace Jump
         public bool InShop = false;
         public bool InInventory = false;
         public bool IsClickReplay = false;
+        public bool IsWin = false;
 
         private readonly string pathsave = $"{Directory.GetCurrentDirectory()}\\HiScore.txt";
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
@@ -154,13 +146,13 @@ namespace Jump
         {
             player.main = this;
             player.playershape.Name = "Player";
+            player.gun.setOwnerGun(player, this);
             gun.player = this.player;
 
             RegisterName(player.playershape.Name, player.playershape);
 
             Playground.Children.Add(player.playershape);
-
-            getAmountBullet();
+            AmountBullet();
         }
 
         public void ShowPlayer()
@@ -362,7 +354,6 @@ namespace Jump
         public void ScoreUp(int amountscore)
         {
             if (IsQuit || IsReplay) return;
-            GunScore(ref amountscore);
 
             score += amountscore;
             Score.Text = "Score: " + score;
@@ -396,18 +387,6 @@ namespace Jump
                 default:
                     ScoreUp(2); 
                     break;
-            }
-        }
-
-        public void GunScore(ref int amountscore)
-        {
-            switch (player.indexgun)
-            {
-                case 1:
-                    amountscore = amountscore / 2;
-                    break;
-                default:
-                    return;
             }
         }
 
@@ -506,17 +485,14 @@ namespace Jump
 
                 if (InShopnInven)
                 {
+                    if (changetime == 9) return;
                     ReadyToShop();
                     return;
                 }
 
                 InShopnInven = false;
 
-                if (bulletAmount <= 0)
-                {
-                    await Reload();
-                    AmountBullet();
-                }
+                if (player.gun.bulletAmount <= 0) player.gun.HandleReload();
             
                 setphase.phase = phase;
                 timetochangemov.Start();
@@ -567,6 +543,8 @@ namespace Jump
 
             }
 
+
+            if (IsWin) return;
             if (!IsQuit && !IsReplay) GameOver();
         }
 
@@ -577,7 +555,7 @@ namespace Jump
             IsHaveBoss = true;
 
             player.IsDead = false;
-            RestartPlayer();
+            player.Restart();
         }
 
         public void ChangeElementMap()
@@ -596,6 +574,14 @@ namespace Jump
 
         // WIN DISPLAY //
 
+        public void WinScene()
+        {
+            KeyCommandManage("off");
+            Main.KeyDown -= ReplayKey;
+            Main.KeyDown -= PauseKey;
+
+            
+        }
 
 
         // GAME OVER DISPLAY //
@@ -670,43 +656,18 @@ namespace Jump
             items.Clear();
         }
 
-        public void RestartPlayer()
-        {
-            player.setDefault();
-
-            if (player.IsDead || IsQuit || IsReplay)
-            {
-                player.IsHaveArmor = false;
-                player.IsHaveAwp = false;
-            }
-            player.IsDead = false;
-            player.IsVietCongKilled = false;
-
-            player.Default();
-        }
-
-        public void RestartInventory()
-        {
-            player.indexgun = 0;
-
-            player.inventory.Clear();
-            player.inventory.Add("de");
-            gun.getPathGun(player.indexgun);
-        }
-
         public void RestartAllEntity()
         {
             ClearEntity();
             ClearItem();
 
-            RestartPlayer();
-            RestartInventory();
+            player.Restart();
+            player.RestartInventory();
         }
 
         public void RestartEquipmentIndex()
         {
             Score.Text = "Score: 0";
-            getAmountBullet();
             AmountBullet();
             ShowMoney();
         }
@@ -756,14 +717,11 @@ namespace Jump
 
         public void RestartBoolElement()
         {
-            IsJump = false;
-            IsShoot = false;
-            IsCrouch = false;
-            IsReload = false;
             IsBreakHiScore = false;
             IsChangeMap = false;
             NotChangeMap = false;
             IsHaveBoss = false;
+            IsWin = false;
             setphase.AlreadyHaveBoss = false;
         }
 
@@ -890,16 +848,9 @@ namespace Jump
             else if (itemindex <= 4 || phase != 3) await SpawnArmor();
         }
 
-        public void getAmountBullet()
-        {
-            gun.getBullet(player.indexgun, ref bulletlimit, ref magazinebulletlimit);
-            bulletAmount = bulletlimit;
-            magazinebullet = magazinebulletlimit;
-        }
-
         public void AmountBullet()
         {
-            BulletAmount.Text = "Bullet: " + bulletAmount + "/" + magazinebullet;
+            BulletAmount.Text = "Bullet: " + player.gun.bulletAmount + "/" + player.gun.magazinebullet;
         }
 
         public async Task SpawnMag()
@@ -918,7 +869,7 @@ namespace Jump
             if (mag.IsTaken)
             {
 
-                mag.MagIsTaken(ref magazinebullet, ref magazinebulletlimit, ref bulletAmount, ref bulletlimit);
+                mag.MagIsTaken(ref player.gun.magazinebullet, ref player.gun.magazinebulletlimit, ref player.gun.bulletAmount, ref player.gun.bulletlimit);
                 AmountBullet();
             }
 
@@ -984,12 +935,12 @@ namespace Jump
             Key key = e.Key;
             if (key == Key.R)
             {
-                ReplayKeyHandle();
+                GetSideWindow();
                 IsClickReplay = true;
             }
         }
 
-        public void ReplayKeyHandle()
+        public void GetSideWindow()
         {
             if (IsClickReplay) return;
             UserControl window;
@@ -1004,7 +955,7 @@ namespace Jump
             if (key == Key.LeftCtrl)
             {
                 player.crouch = true;
-                IsCrouch = true;
+                player.IsCrouch = true;
             }
         }
 
@@ -1035,20 +986,20 @@ namespace Jump
             switch (key)
             {
                 case Key.Space:
-                    HandleJump();
+                    player.HandleJump();
                     break;
 
                 case Key.LeftCtrl:
-                    HandleCrouch();
+                    player.HandleCrouch();
                     break;
 
                 case Key.J:
-                    if (!player.IsHaveAwp) HandleShoot();
-                    else HandleAwpShoot();
+                    if (!player.IsHaveAwp) player.HandleShoot();
+                    else player.HandleAwpShoot();
                     break;
 
                 case Key.R:
-                    HandleReload();
+                    player.gun.HandleReload();
                     break;
 
                 case Key.P:
@@ -1065,8 +1016,8 @@ namespace Jump
             if (key == Key.LeftCtrl)
             {
                 player.crouch = false;
-                IsCrouch = false;
-                IsHoldCtrlLeft = false;
+                player.IsCrouch = false;
+                player.IsHoldCtrlLeft = false;
             }
         }
 
@@ -1095,137 +1046,14 @@ namespace Jump
             
         }
 
-        // HANDLE ACTION //
-
-        public async Task Reload()
-        {
-            if (magazinebullet <= 0) return;
-
-            player.PlayReloadSound();
-
-            await Task.Delay(1600);
-
-            if (magazinebullet < bulletlimit)
-            {
-                OutofMag();
-                return;
-            }
-
-            magazinebullet -= (bulletlimit - bulletAmount);
-            bulletAmount = bulletlimit;
-
-            IsReload = false;
-        }
-
-        public void OutofMag()
-        {
-            bulletAmount = magazinebullet;
-            magazinebullet = 0;
-
-            IsReload = false;
-        }
-
-        private async void HandleReload()
-        {
-            if (bulletAmount == bulletlimit || IsReload) return;
-
-            IsReload = true;
-
-            await Reload();
-            AmountBullet();
-        }
-
-        private void HandleJump()
-        {
-            if (IsJump) return;
-
-            IsJump = true;
-
-            player.setDefault();
-            player.jump = true;
-
-            player.Jump();
-        }
-
-        private void HandleCrouch()
-        {
-            IsHoldCtrlLeft = true;
-
-            if (IsJump) return;
-
-            player.setDefault();
-
-            IsCrouch = true;
-            player.crouch = true;
-            player.Crouch();
-        }
-
-        private void HandleShoot()
-        {
-            if (IsReload) return;
-
-            if (bulletAmount <= 0) return;
-
-            if (IsShoot) return;
-            
-            IsShoot = true;
-            bulletAmount--;
-
-            AmountBullet();
-
-            Bullet bullet = new Bullet()
-            {
-                entities = this.entities,
-                player = this.player,
-                main = this,
-                posout = Canvas.GetTop(player.playershape),
-            };
-
-            bullet.setPosition();
-
-            Playground.Children.Add(bullet.bullet);
-            player.Shoot(bullet, Playground);
-        }
-
-        private async void HandleAwpShoot()
-        {
-            if (IsReload) return;
-
-            if (bulletAmount <= 0) return;
-
-            if (IsShoot) return;
-
-            IsShoot = true;
-            bulletAmount--;
-
-            AmountBullet();
-
-            Bullet bullet = new Bullet()
-            {
-                entities = this.entities,
-                player = this.player,
-                main = this,
-                posout = Canvas.GetTop(player.playershape),
-            };
-
-            bullet.setPosition();
-
-            Playground.Children.Add(bullet.bullet);
-            player.Shoot(bullet, Playground);
-
-            await Task.Delay(500);
-            item.PlaySound("awp");
-
-            await Task.Delay(800);
-            IsShoot = false;
-        }
+        // Release Key //   
 
         private void ReleaseCtrlLeft()
         {
             player.crouch = false;
-            IsHoldCtrlLeft = false;
+            player.IsHoldCtrlLeft = false;
 
-            if (IsJump) return;
+            if (player.IsJump) return;
 
             player.setDefault();
             player.Default();
@@ -1251,7 +1079,7 @@ namespace Jump
             ChangeGameVisibility(Visibility.Visible);
             ArmorVisibility(Visibility.Visible);
 
-            RestartPlayer();
+            player.Restart();
             player.playershape.Visibility = Visibility.Visible;
         }
 
@@ -1367,15 +1195,20 @@ namespace Jump
             UnregisterNameWindow(window);
             IsPause = false;
 
+            PlayerAfterResume();
+
+            KeySettingOff();
+            KeyCommandManage("on");
+        }
+
+        public void PlayerAfterResume()
+        {
             var playertop = Canvas.GetTop(player.playershape);
-            if (playertop >= 250 && !IsCrouch)
+            if (playertop >= 250 && !player.IsCrouch)
             {
                 player.setDefault();
                 player.Default();
             }
-
-            KeySettingOff();
-            KeyCommandManage("on");
         }
     }
 }

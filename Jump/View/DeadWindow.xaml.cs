@@ -31,7 +31,11 @@ namespace Jump.View
         public int mapindex { get; set; }
         public int score { get; set; }
 
-        public DeadWindow() { }
+        public DeadWindow()
+        {
+            InitializeComponent();
+            UpdateScore();
+        }
         public DeadWindow(MainWindow main, int mapindex, int score)
         {
             this.main = main;
@@ -236,7 +240,7 @@ namespace Jump.View
             scorebar.GetScore();
             for (int index = 0; index < scorebar.listhighscore.Count; index++)
             {
-                ListScore.Items.Add(scorebar.CreateScoreBar(index));
+                ListScore.Items.Add(scorebar.CreateScoreBar(index, 250));
             }
         }
     }

@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Height="650" Width="1000">
     <Viewbox Stretch="Fill">
-        <Canvas Height="650" Width="1000">
+        <Canvas Height="650" Width="1000" Name="mainmenu">
             <Canvas.Background>
                 <ImageBrush ImageSource="/Picture/mainbackground.png" TileMode="None" Stretch="Fill"/>
             </Canvas.Background>
@@ -17,7 +17,8 @@
                     <ImageBrush ImageSource="/Picture/Title.png"/>
                 </Rectangle.Fill>
             </Rectangle>
-            <Button x:Name="Start" Click="HandlePreStartGame" Canvas.Left="345" Canvas.Top="225"/>
+            <Button x:Name="Start" Height="50" Width="300" Click="HandlePreStartGame" Canvas.Left="345" Canvas.Top="225"/>
+            <Button x:Name="HighScore" Height="50" Width="300" Canvas.Left="345" Canvas.Top="325" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         </Canvas>
     </Viewbox>
 </UserControl>

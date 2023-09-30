@@ -35,8 +35,7 @@
             <Button x:Name="Quit" Width="135" Height="50" Canvas.Left="24" Canvas.Top="568" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             <Button x:Name="Replay" Width="135" Height="50" Canvas.Left="836" Canvas.Top="568" HorizontalAlignment="Left" VerticalAlignment="Center"/>
             <ScrollViewer VerticalScrollBarVisibility="Hidden" Height="370" Canvas.Left="720" Canvas.Top="131">
-                <ItemsControl x:Name="ListScore" Width="250" Canvas.Left="720" Canvas.Top="131" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FF1F0909">
-                </ItemsControl>
+                <ItemsControl x:Name="ListScore" Width="250" Canvas.Left="720" Canvas.Top="131" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FF860808"/>
             </ScrollViewer>
             <TextBlock Text="HighScore: " TextAlignment="Center" Height="42" Width="250" Canvas.Left="720" Canvas.Top="96" TextWrapping="Wrap" FontSize="30" Foreground="Red" HorizontalAlignment="Center" VerticalAlignment="Top" FontWeight="Bold">
                 <TextBlock.Background>

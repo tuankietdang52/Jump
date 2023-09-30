@@ -34,6 +34,7 @@ namespace Jump.View
         public void CreateButton()
         {
             ButtonStart();
+            ButtonHighScore();
         }
 
         public void ButtonStart()
@@ -42,10 +43,24 @@ namespace Jump.View
             custom.CreateButton("START", ref Start);
         }
 
+
         public void HandlePreStartGame(object sender, RoutedEventArgs e)
         {
             main!.PreStartGame();
             main.Playground.Children.Remove(this);
+        }
+
+        public void ButtonHighScore()
+        {
+            CustomButton custom = new CustomButton();
+            custom.CreateButton("HIGHSCORE", ref HighScore);
+            HighScore.Click += HandleHighScore;
+        }
+
+        public void HandleHighScore(object sender, RoutedEventArgs e)
+        {
+            HighScoreView highScoreview = new HighScoreView(this);
+            mainmenu.Children.Add(highScoreview);
         }
     }
 }

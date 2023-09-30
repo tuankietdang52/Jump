@@ -4,7 +4,9 @@ using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.Data.Sqlite;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Jump.Sql
 {
@@ -31,7 +33,58 @@ namespace Jump.Sql
             public int score { get; set; }
         };
 
+        private void GetName(ref List<string> listname)
+        {
+            var getlistname = connection.CreateCommand();
+            getlistname.CommandText = @"SELECT NAME FROM HIGHSCORE";
+
+            var nameobj = new object[1];
+            using (var reader = getlistname.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    reader.GetValues(nameobj);
+                    listname.Add(Convert.ToString(nameobj[0])!);
+                }
+            }
+        }
+
         public void InsertScore(string name, int score)
+        {
+            List<string> listname = new List<string>();
+            GetName(ref listname);
+
+            foreach (var item in listname)
+            {
+                if (item == name)
+                {
+                    UpdateScore(name, score);
+                    return;
+                }
+            }
+
+            InsertNewScore(name, score);
+        }
+
+        public void UpdateScore(string name, int score)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                var update = new SqliteCommand
+                    ("UPDATE HIGHSCORE " +
+                    "SET SCORE = @score " +
+                    "WHERE NAME = @name",
+                connection, transaction
+                    );
+                update.Parameters.AddWithValue("@score", score);
+                update.Parameters.AddWithValue("@name", name);
+
+                update.ExecuteNonQuery();
+                transaction.Commit();
+            }
+        }
+
+        public void InsertNewScore(string name, int score)
         {
             using (var transaction =  connection.BeginTransaction())
             {

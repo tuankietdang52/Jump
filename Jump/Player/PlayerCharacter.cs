@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Jump.Weapon.DesertEagle;
+using Jump.Weapon.Weapon_Type;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Jump.EnemyEntity;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Jump
@@ -27,10 +30,9 @@ namespace Jump
 
         public Rectangle playershape = new Rectangle();
         public MainWindow? main { get; set; }
-        public MediaPlayer soundreload = new MediaPlayer();
         public MediaPlayer voicedead = new MediaPlayer();
 
-        private Gun gun = new Gun();
+        public Gun gun = new Gun();
 
         public List<string> inventory = new List<string>();
 
@@ -45,11 +47,15 @@ namespace Jump
         public bool IsHaveAwp = false;
         public bool IsDead = false;
 
+        public bool IsJump = false;
+        public bool IsHoldCtrlLeft = false;
+        public bool IsCrouch = false;
+        public bool IsReload = false;
+        public bool IsShoot = false;
+
         public int playerhitboxright { get; }
         public bool crouch { get; set; }
         public bool jump { get; set; }
-
-        public string? reloadsoundpath;
         public string? stand { get; set; }
         public string? standshoot { get; set; }
         public string? jumpgun { get; set; }
@@ -60,11 +66,8 @@ namespace Jump
         {
             setElement(137, 86);
 
-            gun.player = this;
-
-            gun.ChangeGun("awp");
+            ChangeGun("m4a4");
             inventory.Add("de");
-            gun.getPathGun(indexgun);
 
             playershape.Fill = new ImageBrush
             {
@@ -75,12 +78,37 @@ namespace Jump
             setDefault();
         }
 
-        // GET SET //
-
-        public double getHeight()
+        public void Restart()
         {
-            return 0.2;
+            setDefault();
+
+            if (IsDead || main!.IsQuit || main.IsReplay)
+            {
+                IsHaveArmor = false;
+                IsHaveAwp = false;
+                ChangeGun("de");
+            }
+            IsDead = false;
+            IsVietCongKilled = false;
+
+            IsJump = false;
+            IsShoot = false;
+            IsCrouch = false;
+            IsReload = false;
+
+            Default();
         }
+
+        public void RestartInventory()
+        {
+            indexgun = 0;
+
+            inventory.Clear();
+            inventory.Add("de");
+            gun.getPathPlayer();
+        }
+
+        // GET SET //
 
         public void setDefault()
         {
@@ -88,36 +116,19 @@ namespace Jump
             Canvas.SetTop(playershape, 215);
         }
 
-        // SOUND AND VOICE //
-
         public void setDefaultDead()
         {
             Canvas.SetLeft(playershape, 130);
             Canvas.SetTop(playershape, 270);
         }
 
+        // SOUND AND VOICE //
+
         public void PlayDeadVoice(string path)
         {
             voicedead.Open(new(path));
             voicedead.Volume = 1;
             voicedead.Play();
-        }
-
-        public void PlayReloadSound()
-        {
-            gun.getReloadsound(ref reloadsoundpath!, indexgun);
-            soundreload.Open(new (reloadsoundpath));
-            soundreload.Volume = 100;
-            soundreload.Play();
-        }
-
-        public void PlaySound(string soundpath)
-        {
-            MediaPlayer sound = new MediaPlayer();
-
-            sound.Open(new(soundpath));
-            sound.Volume = 100;
-            sound.Play();
         }
 
         public void GetVoiceDead()
@@ -181,6 +192,119 @@ namespace Jump
             ChangeSprite(stand!);
         }
 
+        // WEAPON //
+
+        public void ChangeGun(string gunname)
+        {
+            switch (gunname)
+            {
+                case "de":
+                    DesertEagle de = new DesertEagle(this, main!);
+                    gun = de;
+                    indexgun = 0;
+                    break;
+
+                case "m4a4":
+                    M4A4 m4a4 = new M4A4(this, main!);
+                    gun = m4a4;
+                    indexgun = 1;
+                    break;
+
+                case "awp":
+                    AWP awp = new AWP(this, main!);
+                    gun = awp;
+                    indexgun = 2;
+                    IsHaveAwp = true;
+                    break;
+            }
+
+            gun.getPathPlayer();
+            gun.getSound();
+        }
+
+
+
+        // HANDLE ACTION //
+
+        public void HandleJump()
+        {
+            if (IsJump) return;
+
+            IsJump = true;
+
+            setDefault();
+            jump = true;
+
+            Jump();
+        }
+
+        public void HandleCrouch()
+        {
+            IsHoldCtrlLeft = true;
+
+            if (IsJump) return;
+
+            setDefault();
+
+            IsCrouch = true;
+            crouch = true;
+            Crouch();
+        }
+
+        private void CreateBullet()
+        {
+            Bullet bullet = new Bullet()
+            {
+                entities = this.main!.entities,
+                player = this,
+                main = this.main!,
+                posout = Canvas.GetTop(playershape),
+            };
+
+            bullet.setPosition();
+
+            main.Playground.Children.Add(bullet.bullet);
+            Shoot(bullet, main.Playground);
+        }
+
+        public void HandleShoot()
+        {
+            if (IsReload) return;
+
+            if (gun.bulletAmount <= 0) return;
+
+            if (IsShoot) return;
+
+            IsShoot = true;
+            gun.bulletAmount--;
+
+            main!.AmountBullet();
+
+            CreateBullet();
+        }
+
+        public async void HandleAwpShoot()
+        {
+            if (IsReload) return;
+
+            if (gun.bulletAmount <= 0) return;
+
+            if (IsShoot) return;
+
+            IsShoot = true;
+            gun.bulletAmount--;
+
+            main!.AmountBullet();
+
+            CreateBullet();
+
+            await Task.Delay(500);
+            main.item.PlaySound("awp");
+
+            await Task.Delay(800);
+            IsShoot = false;
+        }
+
         // ACTION //
 
         public async Task DropPlayer()
@@ -202,7 +326,7 @@ namespace Jump
                 await Task.Delay(dropdown);
                 movedown += 50;
             }
-            main!.IsJump = false;
+            IsJump = false;
         }
 
         public async void Jump()
@@ -285,7 +409,7 @@ namespace Jump
             var top = Canvas.GetTop(playershape);
             setElement(141, 151);
 
-            if (main!.IsJump)
+            if (IsJump)
             {
                 ChangeToJumpShoot();
             }
@@ -298,11 +422,11 @@ namespace Jump
                 DefaultShoot();
             }
 
-            bullet.PlayShootSound();
+            gun.PlaySoundShoot();
 
             await bullet.Move();
 
-            if (!IsHaveAwp) main!.IsShoot = false; 
+            if (!IsHaveAwp) IsShoot = false; 
 
             playground.Children.Remove(bullet.bullet);
             await Task.Delay(200);

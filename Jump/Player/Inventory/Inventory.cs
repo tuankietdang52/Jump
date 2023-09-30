@@ -263,28 +263,10 @@ namespace Jump
             Button use = (Button)sender;
             gun.player = this.player;
 
-            switch (name)
-            {
-                case "de":
-                    gun.ChangeGun("de");
-                    player!.indexgun = 0;
-                    break;
-                case "m4a4":
-                    gun.ChangeGun("m4a4");
-                    player!.indexgun = 1;
-                    break;
-                case "awp":
-                    gun.ChangeGun("awp");
-                    player!.indexgun = 2;
-                    break;
+            player!.ChangeGun(name!);
 
-                default:
-                    return;
-            }
+            if (!IsUse) PlaySound(name!);
 
-            if (!IsUse) PlaySound(name);
-
-            main!.getAmountBullet();
             shopninven!.AddItemInventory();
         }
 

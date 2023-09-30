@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="Jump.View.HighScoreView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Jump.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="1000">
+    <Viewbox Stretch="Fill">
+        <Canvas Width="1000" Height="650">
+            <Canvas.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF170202" Offset="0.485"/>
+                    <GradientStop Color="#FF6F0202" Offset="0.16"/>
+                </LinearGradientBrush>
+            </Canvas.Background>
+            <TextBlock Text="HIGHSCORE" FontSize="70" Foreground="Red" FontWeight="Bold"/>
+            <ListView x:Name="HighScoreList" Height="361" Width="750" Canvas.Left="124" Canvas.Top="115" HorizontalAlignment="Center" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Disabled" BorderThickness="0" Background="Transparent" d:ItemsSource="{d:SampleData ItemCount=5}"/>
+            <Button x:Name="Quit" Width="173" Height="65" Canvas.Left="50" Canvas.Top="535" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        </Canvas>
+    </Viewbox>
+</UserControl>

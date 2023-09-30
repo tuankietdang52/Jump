@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Jump.EnemyEntity;
 
 namespace Jump
 {
@@ -30,8 +31,6 @@ namespace Jump
 
         public List<Entity>? entities { get; set; }
         public Rectangle bullet = new Rectangle();
-        public MediaPlayer gunsound = new MediaPlayer();
-        public Gun gun = new Gun();
         public MainWindow? main { get; set; }
         public PlayerCharacter? player { get; set; }
 
@@ -58,17 +57,9 @@ namespace Jump
             else Canvas.SetTop(bullet, posout + 50);
         }
 
-        public void PlayShootSound()
-        {
-            gun.getGunsound(ref gunsoundpath!, player!.indexgun);
-            gunsound.Open(new (gunsoundpath!));
-            gunsound.Volume = 1;
-            gunsound.Play();
-        }
-
         public async Task Move()
         {
-            speed = gun.getBulletspeed(player!.indexgun);
+            speed = player!.gun.bulletspeed;
             double bulletpos = Canvas.GetLeft(bullet);
 
             while (bulletpos < 1200)
