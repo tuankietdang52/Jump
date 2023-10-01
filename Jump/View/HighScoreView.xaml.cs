@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Jump.View
 {
@@ -22,31 +23,107 @@ namespace Jump.View
 
         public ScoreBar scorebar = new ScoreBar();
         public HighScore highscore = new HighScore();
+
+        public bool IsSaveScore = false;
+        public int score { get; set; }
         public MainMenu? mainmenu { get; set; }
-        public HighScoreView(MainMenu mainmenu)
+
+        public HighScoreView(MainMenu mainmenu, MainWindow main)
         {
             this.mainmenu = mainmenu;
+            this.main = main;
 
             InitializeComponent();
             UpdateScore();
-            CreateButton();
+            CreateButtoninMainMenu();
         }
 
-        public void CreateButton()
+        public HighScoreView(MainWindow main)
+        {
+            this.main = main;
+
+            InitializeComponent();
+            UpdateScore();
+            CreateButtonwhenWin();
+        }
+
+        public void CreateButtoninMainMenu()
         {
             ButtonQuit();
+            HideTypeScore();
+        }
+
+        public void CreateButtonwhenWin()
+        {
+            ButtonQuit();
+            CreateButtonSave();
+        }
+
+        public void HideTypeScore()
+        {
+            ScoreType.Visibility = Visibility.Collapsed;
+            Save.Visibility = Visibility.Collapsed;
+            SaveScoreTxt.Visibility = Visibility.Collapsed;
         }
 
         public void ButtonQuit()
         {
             CustomButton custom = new CustomButton();
             custom.CreateButton("QUIT", ref Quit, 173, 65);
-            Quit.Click += HandleQuit;
+            if (!main!.IsWin) Quit.Click += HandleQuittoStart;
+            else Quit.Click += HandleQuitinWin;
         }
 
-        public void HandleQuit(object sender, RoutedEventArgs e)
+        public void HandleQuittoStart(object sender, RoutedEventArgs e)
         {
             mainmenu!.mainmenu.Children.Remove(this);
+        }
+
+        public void HandleQuitinWin(object sender, RoutedEventArgs e)
+        {
+            main!.IsWin = false;
+            main.Quit(this);
+        }
+
+        public void CreateButtonSave()
+        {
+            CustomButton custom = new CustomButton();
+            custom.CreateButton("SAVE", ref Save, 95, 50);
+            Save.Click += HandleSave;
+        }
+
+        public void NonEditScoreType()
+        {
+            ScoreType.IsReadOnly = true;
+            SaveScoreTxt.Text = "Score Saved";
+            SaveScoreTxt.Foreground = Brushes.LightGreen;
+        }
+
+        private void TypeText(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            main!.KeySettingOff();
+            main.KeyDown -= main.ReplayKey;
+        }
+
+        private void DoneType(object sender, RoutedEventArgs e)
+        {
+            Keyboard.Focus(this);
+            main!.KeyDown += main.ReplayKey;
+        }
+
+        public void HandleSave(object sender, RoutedEventArgs e)
+        {
+            if (IsSaveScore) return;
+            if (ScoreType.Text.Length >= 8)
+            {
+                MessageBox.Show("adu man?");
+                return;
+            }
+            IsSaveScore = true;
+            NonEditScoreType();
+
+            highscore.InsertScore(ScoreType.Text, score);
+            UpdateScore();
         }
 
         public void UpdateScore()

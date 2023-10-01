@@ -59,7 +59,7 @@ namespace Jump.View
 
         public void HandleHighScore(object sender, RoutedEventArgs e)
         {
-            HighScoreView highScoreview = new HighScoreView(this);
+            HighScoreView highScoreview = new HighScoreView(this, main!);
             mainmenu.Children.Add(highScoreview);
         }
     }

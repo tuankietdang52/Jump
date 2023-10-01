@@ -641,8 +641,10 @@ namespace Jump.EnemyEntity
             var pos = Canvas.GetLeft(this.entity);
             var postop = Canvas.GetTop(this.entity);
 
-            CreateHealthBar(1000);
-            CreateSecondHealthbar(1000);
+            //CreateHealthBar(1000);
+            //CreateSecondHealthbar(1000);
+            CreateHealthBar(0);
+            CreateSecondHealthbar(1);
 
             timemove.Start();
             skilltime.Start();
@@ -657,13 +659,16 @@ namespace Jump.EnemyEntity
                 }
                 else ResumeTime();
 
-                if (player!.IsDead || main!.IsQuit) break;
+                if (player!.IsDead || main!.IsQuit) return;
 
                 if (getHit && !IsHarmless)
                 {
                     DecreaseBossHealth();
 
-                    if (CheckDead()) return;
+                    if (CheckDead())
+                    {
+                        break;
+                    }
                 }
 
                 CheckPhase();
@@ -675,6 +680,8 @@ namespace Jump.EnemyEntity
                 if (!IsCreateClone) UseSkill();
                 else CloneMagic();
             }
+
+            main!.IsWin = true;
         }
     }
 }

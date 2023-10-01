@@ -37,9 +37,9 @@ namespace Jump
 {
     public partial class MainWindow : Window
     {
-        public int phase = 1;
-        public int mapindex = 1;
-        public int changetime = 3;
+        public int phase = 3;
+        public int mapindex = 3;
+        public int changetime = 9;
 
         public int timechange = 30;
         public int limitchangetime = 9;
@@ -48,7 +48,6 @@ namespace Jump
         public int score = 200;
         public double volumeadjust = 0.2;
 
-        public bool IsBreakHiScore = false;
         public bool IsReplay = false;
         public bool IsHoldCtrlLeft = false;
         public bool IsChangeMap = false;
@@ -384,6 +383,9 @@ namespace Jump
                 case Kamikaze:
                     ScoreUp(3);
                     break;
+                case DarkMage:
+                    ScoreUp(100);
+                    break;
                 default:
                     ScoreUp(2); 
                     break;
@@ -401,11 +403,8 @@ namespace Jump
 
         private void Looptheme(object sender, EventArgs e)
         {
-            if (!player.IsDead)
-            {
-                theme.Stop();
-                theme.Play();
-            }
+            theme.Stop();
+            theme.Play();
         }
 
         // GAME SETTING //
@@ -485,7 +484,7 @@ namespace Jump
 
                 if (InShopnInven)
                 {
-                    if (changetime == 9) return;
+                    if (changetime >= 9) break;
                     ReadyToShop();
                     return;
                 }
@@ -544,8 +543,8 @@ namespace Jump
             }
 
 
-            if (IsWin) return;
-            if (!IsQuit && !IsReplay) GameOver();
+            if (IsWin) WinScene();
+            else if (!IsQuit && !IsReplay) GameOver();
         }
 
         public void ToBoss()
@@ -572,17 +571,61 @@ namespace Jump
             PlayTheme(themepath!, volumeadjust);
         }
 
-        // WIN DISPLAY //
+        // WIN //
 
         public void WinScene()
         {
+            theme.Stop();
+
             KeyCommandManage("off");
             Main.KeyDown -= ReplayKey;
             Main.KeyDown -= PauseKey;
 
-            
+            player.GetVoiceWin();
+
+            CTBulletIncoming();
         }
 
+        public async void CTBulletIncoming()
+        {
+            await Task.Delay(4000);
+            CTBullet ctbullet = new CTBullet(player, Playground, this);
+
+            Playground.Children.Add(ctbullet.entity);
+            entities.Add(ctbullet);
+
+            await ctbullet.Action();
+        }
+
+        public async void ResultScene()
+        {
+            player.GetVoiceDead();
+            player.setDefaultDead();
+            player.DefaultDead();
+
+            await Task.Delay(2000);
+            ToWinDisplay();
+        }
+
+        public void ToWinDisplay()
+        {
+            themepath = pathsound + "arcahv.mp3";
+            PlayTheme(themepath, 0.2);
+            WinView();
+        }
+
+        public void MoveWinDisplay(WinDisplay windisplay, double pos)
+        {
+            Canvas.SetLeft(windisplay, pos);
+        }
+
+        // WIN DISPLAY //
+
+        public void WinView()
+        {
+            WinDisplay windisplay = new WinDisplay(this);
+            Playground.Children.Add(windisplay);
+        }
 
         // GAME OVER DISPLAY //
 
@@ -717,13 +760,19 @@ namespace Jump
 
         public void RestartBoolElement()
         {
-            IsBreakHiScore = false;
             IsChangeMap = false;
             NotChangeMap = false;
+            InShopnInven = false;
             IsHaveBoss = false;
             IsWin = false;
+            IsReplay = false;
+            IsSpawnPirate = false;
+            IsHaveAspotate = false;
+            InInventory = false;
+            IsWin = false;
+
             setphase.AlreadyHaveBoss = false;
-        }
+    }
 
         public void RestartNumberElement()
         {

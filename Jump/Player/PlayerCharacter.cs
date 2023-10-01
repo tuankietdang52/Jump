@@ -1,5 +1,4 @@
-﻿using Jump.Weapon.DesertEagle;
-using Jump.Weapon.Weapon_Type;
+﻿using Jump.Weapon.Weapon_Type;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +18,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Jump.EnemyEntity;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Jump
 {
@@ -30,7 +28,10 @@ namespace Jump
 
         public Rectangle playershape = new Rectangle();
         public MainWindow? main { get; set; }
+
         public MediaPlayer voicedead = new MediaPlayer();
+        public MediaPlayer winvoice = new MediaPlayer();
+        public MediaPlayer voice = new MediaPlayer();
 
         public Gun gun = new Gun();
 
@@ -66,7 +67,7 @@ namespace Jump
         {
             setElement(137, 86);
 
-            ChangeGun("m4a4");
+            ChangeGun("awp");
             inventory.Add("de");
 
             playershape.Fill = new ImageBrush
@@ -124,7 +125,7 @@ namespace Jump
 
         // SOUND AND VOICE //
 
-        public void PlayDeadVoice(string path)
+        private void PlayDeadVoice(string path)
         {
             voicedead.Open(new(path));
             voicedead.Volume = 1;
@@ -139,9 +140,23 @@ namespace Jump
             PlayDeadVoice(deadvoice);
         }
 
+        private void PlayWinVoice(string path)
+        {
+            winvoice.Open(new(path));
+            winvoice.Volume = 1;
+            winvoice.Play();
+        }
+
+        public void GetVoiceWin()
+        {
+            Random voicewin = new Random();
+            int voicewinindex = voicewin.Next(1, 6);
+            string winvoice = pathsound + "voicewin" + voicewinindex + ".mp3";
+            PlayWinVoice(winvoice);
+        }
+
         public void VoicePlay(string path)
         {
-            MediaPlayer voice = new MediaPlayer();
             voice.Open(new(path));
             voice.Volume = 1;
             voice.Play();

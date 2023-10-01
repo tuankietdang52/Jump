@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jump.Weapon.DesertEagle
+namespace Jump.Weapon.Weapon_Type
 {
     public class DesertEagle : Gun
     {
