@@ -20,7 +20,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Jump.EnemyEntity
 { 
@@ -38,11 +37,12 @@ namespace Jump.EnemyEntity
 
         public bool IsGetPos = false;
         public bool IsShootDouble = false;
-        public bool[] IsTrigger = new bool[10];
+        public bool[] IsTrigger = new bool[6];
         public bool IsInvisible = false;
         public bool IsCreateClone = false;
         public bool IsCreateMagicMissileClone = false;
         public bool IsClone = false;
+        public bool SkillCloneWait = false;
 
         public int actions = 0;
         public int missilecount = 0;
@@ -175,10 +175,7 @@ namespace Jump.EnemyEntity
                     return skillrand.Next(0, 7);
 
                 case 2:
-                    return skillrand.Next(0, 13);
-
-                case 3:
-                    return skillrand.Next(0, 15);
+                    return skillrand.Next(0, 12);
 
                 default:
                     return 0;
@@ -199,33 +196,30 @@ namespace Jump.EnemyEntity
             {
                 case 0: case 1: case 2:
                     if (actions == 0) Shoot(pos, postop);
-                    return;
+                    break;
 
                 case 3: case 4: case 5:
                     if (actions == 0) ShootDouble(pos, postop);
-                    return;
+                    break;
 
                 case 6:
                     if (actions == 0) SpawnMagicBall();
-                    return;
+                    break;
 
                 case 7: case 8: case 9:
-                    RandomCircle();
-                    return;
+                    if (actions == 0) RandomCircle();
+                    break;
 
                 case 10: case 11:
-                   if (actions != 0) return;
+                   if (actions != 0 || SkillCloneWait) return;
                    HandleClone();
                    timetoskill = 0;
-                   return;
-
-                case 12:
-                   if (actions == 0) HandleHealing();
                    return;
 
                 default:
                     return;
             }
+            SkillCloneWait = false;
         }
 
         public void RandomCircle()
@@ -309,7 +303,7 @@ namespace Jump.EnemyEntity
             var posleft = Canvas.GetLeft(this.entity) - 30;
             var postop = Canvas.GetTop(this.entity) - 10;
 
-            MagicMissile magicmissile = new MagicMissile(posleft, postop, player!, playground!, main!);
+            MagicMissile magicmissile = new MagicMissile(posleft, postop, player!, playground!, main!, this);
 
             magicmissile.boss = this;
             magicmissile.soundpath = pathsound + "magicshot.mp3";
@@ -355,7 +349,8 @@ namespace Jump.EnemyEntity
 
         public async void CreateMagicCircleShoot()
         {
-            MagicCircleShoot magiccircle = new MagicCircleShoot(player!, playground!, main!);
+            actions++;
+            MagicCircleShoot magiccircle = new MagicCircleShoot(player!, playground!, main!, this);
 
             magiccircle.boss = this;
 
@@ -363,6 +358,7 @@ namespace Jump.EnemyEntity
             playground!.Children.Add(magiccircle.entity);
 
             await magiccircle.Action();
+            actions--;
         }
 
         public void HandleHealing()
@@ -460,7 +456,7 @@ namespace Jump.EnemyEntity
 
         public async void CreateMagicMissileClone()
         {
-            MagicMissileClone magicmissileclone = new MagicMissileClone(player!, playground!, main!);
+            MagicMissileClone magicmissileclone = new MagicMissileClone(player!, playground!, main!, this);
 
             magicmissileclone.boss = this;
 
@@ -476,6 +472,7 @@ namespace Jump.EnemyEntity
 
             IsCreateClone = false;
             IsHarmless = false;
+            SkillCloneWait = true;
             entity!.Fill.Opacity = 1;
 
             newpathimg = pathpic + "darkmage.png";
@@ -493,15 +490,6 @@ namespace Jump.EnemyEntity
         {
             skilltime.Start();
             timemove.Start();
-        }
-
-        public void Dead()
-        {
-            getHit = true;
-            IsDead = true;
-            main!.ClearEntity();
-            player!.IsDead = false;
-            playground!.Children.Remove(healthbar);
         }
 
         public void CheckPhaseBossSecondHealthBar()
@@ -540,7 +528,7 @@ namespace Jump.EnemyEntity
                     IsTrigger[2] = true;
                     break;
 
-                case >= 680:
+                case >= 600:
                     if (IsTrigger[3]) break;
                     armor = 80;
                     IsTrigger[3] = true;
@@ -549,7 +537,6 @@ namespace Jump.EnemyEntity
                 case >= 350:
                     if (IsTrigger[4]) break;
                     armor = 85;
-                    skillphase = 3;
                     IsTrigger[4] = true;
                     Healing();
                     break;
@@ -630,10 +617,53 @@ namespace Jump.EnemyEntity
         {
             if (healthbar!.Width <= 0)
             {
-                Dead();
+                ElementDead();
                 return true;
             }
             return false;
+        }
+
+        public async void CreateMagicCircleDead()
+        {
+            MagicCircleDead magiccircledead = new MagicCircleDead(player!, playground!, main!, this);
+
+            playground!.Children.Add(magiccircledead.entity);
+            main!.entities.Add(magiccircledead);
+
+            await magiccircledead.Action();
+        }
+
+        public async Task Dead()
+        {
+            double pos = Canvas.GetTop(this.entity);
+            double opacity = this.entity!.Fill.Opacity;
+            while (opacity >= 0)
+            {
+                pos += 10;
+                TimeSpan move = TimeSpan.FromSeconds(0.1);
+                await Task.Delay(move);
+
+                DeadAnimation(opacity);
+                opacity -= 0.1;
+                if (pos <= 230) Canvas.SetTop(this.entity, pos);
+            }
+            main!.IsWin = true;
+            main!.ClearEntity();
+        }
+
+        public void ElementDead()
+        {
+            getHit = true;
+            IsDead = true;
+            player!.IsDead = false;
+            playground!.Children.Remove(healthbar);
+        }
+
+        public void DeadAnimation(double opacity)
+        {
+            newpathimg = pathpic + "darkmagedead.png";
+            SetAnimation(120, 100);
+            this.entity!.Fill.Opacity = opacity;
         }
 
         public override async Task Action()
@@ -641,10 +671,8 @@ namespace Jump.EnemyEntity
             var pos = Canvas.GetLeft(this.entity);
             var postop = Canvas.GetTop(this.entity);
 
-            //CreateHealthBar(1000);
-            //CreateSecondHealthbar(1000);
-            CreateHealthBar(0);
-            CreateSecondHealthbar(1);
+            CreateHealthBar(1000);
+            CreateSecondHealthbar(1000);
 
             timemove.Start();
             skilltime.Start();
@@ -665,10 +693,7 @@ namespace Jump.EnemyEntity
                 {
                     DecreaseBossHealth();
 
-                    if (CheckDead())
-                    {
-                        break;
-                    }
+                    if (CheckDead()) break;
                 }
 
                 CheckPhase();
@@ -681,7 +706,8 @@ namespace Jump.EnemyEntity
                 else CloneMagic();
             }
 
-            main!.IsWin = true;
+            CreateMagicCircleDead();
+            await Dead();
         }
     }
 }

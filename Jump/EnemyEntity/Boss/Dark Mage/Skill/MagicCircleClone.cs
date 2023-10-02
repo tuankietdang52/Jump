@@ -25,13 +25,13 @@ namespace Jump.EnemyEntity
 {
     public class MagicCircleClone : MagicCircle
     {
-        public DarkMage owner = new DarkMage();
+        public DarkMage cloneowner = new DarkMage();
         public MagicCircleClone(PlayerCharacter player, Canvas playground, MainWindow main, DarkMage owner)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
-            this.owner = owner;
+            cloneowner = owner;
             this.boss = owner;
 
             pathimgentity = pathpic + "magiccircleclone.png";
@@ -47,16 +47,16 @@ namespace Jump.EnemyEntity
             height = 150;
             width = 150;
 
-            left = Canvas.GetLeft(owner!.entity);
-            top = Canvas.GetTop(owner!.entity);
+            left = Canvas.GetLeft(cloneowner!.entity);
+            top = Canvas.GetTop(cloneowner!.entity);
 
             SetEntity();
         }
 
         public void FollowMage()
         {
-            left = Canvas.GetLeft(owner!.entity) - 28;
-            top = Canvas.GetTop(owner!.entity) - 10;
+            left = Canvas.GetLeft(cloneowner!.entity) - 28;
+            top = Canvas.GetTop(cloneowner!.entity) - 10;
 
             Canvas.SetLeft(this.entity, left);
             Canvas.SetTop(this.entity, top);
@@ -84,9 +84,9 @@ namespace Jump.EnemyEntity
 
         public bool CheckExpressionDisappear()
         {
-            if (owner.IsClone && owner.IsDead) return true;
+            if (cloneowner.IsClone && cloneowner.IsDead) return true;
             
-            else if (!owner.IsCreateClone && !owner.IsClone) return true;
+            else if (!cloneowner.IsCreateClone && !cloneowner.IsClone) return true;
 
             return false;
         }
@@ -116,7 +116,7 @@ namespace Jump.EnemyEntity
 
                 FollowMage();
 
-                if (owner.IsCreateMagicMissileClone && !IsReady) Morph();
+                if (cloneowner.IsCreateMagicMissileClone && !IsReady) Morph();
             }
 
             if (!IsDead) return;

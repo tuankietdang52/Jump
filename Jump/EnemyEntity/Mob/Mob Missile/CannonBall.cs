@@ -17,11 +17,12 @@ namespace Jump.EnemyEntity
 
         public Rectangle cannonball = new Rectangle();
 
-        public CannonBall(double left, PlayerCharacter player, Canvas playground, MainWindow main)
+        public CannonBall(double left, PlayerCharacter player, Canvas playground, MainWindow main, PirateCaptain owner)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
+            this.owner = owner;
 
             height = 60;
             width = 60;

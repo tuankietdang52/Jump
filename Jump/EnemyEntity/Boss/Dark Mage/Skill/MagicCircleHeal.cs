@@ -27,12 +27,14 @@ namespace Jump.EnemyEntity
     {
         public List<HealingOrb> healingorb = new List<HealingOrb>();
         public bool IsDisappear = false;
+
         public MagicCircleHeal(PlayerCharacter player, Canvas playground, MainWindow main, Entity boss)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
             this.boss = boss;
+            this.owner = boss;
 
             pathimgentity = pathpic + "magiccircleheal.png";
 
@@ -77,11 +79,11 @@ namespace Jump.EnemyEntity
             if (boss!.secondhealthbar!.Width >= 1000) return;
             if (boss!.healthbar!.Width <= 1000)
             {
-                boss.healthbar!.Width += 4;
+                boss.healthbar!.Width += 1;
             }
             else
             {
-                boss.secondhealthbar!.Width += 2;
+                boss.secondhealthbar!.Width += 0.5;
             }
         }
 

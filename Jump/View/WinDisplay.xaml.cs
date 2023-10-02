@@ -52,8 +52,7 @@ namespace Jump.View
 
         public async void HandleToHighScore(object sender, RoutedEventArgs e)
         {
-            HighScoreView highscoreview = new HighScoreView(main!);
-            highscoreview.score = score;
+            HighScoreView highscoreview = new HighScoreView(main!, score);
 
             Canvas.SetLeft(highscoreview, 1000);
             Canvas.SetLeft(win, 0);

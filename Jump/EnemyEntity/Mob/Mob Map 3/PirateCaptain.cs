@@ -95,7 +95,7 @@ namespace Jump.EnemyEntity
         {
             string pathsoundeffect = pathsound + "cannonshot.mp3";
 
-            CannonBall cannonball = new CannonBall(left, player!, playground!, main!);
+            CannonBall cannonball = new CannonBall(left, player!, playground!, main!, this);
 
             cannonball.movementspeed = bulletspeed;
 

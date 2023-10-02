@@ -46,11 +46,12 @@ namespace Jump.EnemyEntity
 
         public double speedtop;
 
-        public MagicMissile(double left, double top, PlayerCharacter player, Canvas playground, MainWindow main)
+        public MagicMissile(double left, double top, PlayerCharacter player, Canvas playground, MainWindow main, Entity owner)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
+            this.owner = owner;
 
             height = 30;
             width = 50;

@@ -26,11 +26,12 @@ namespace Jump.EnemyEntity
     {
         public bool IsShoot = false;
 
-        public MagicCircleShoot(PlayerCharacter player, Canvas playground, MainWindow main)
+        public MagicCircleShoot(PlayerCharacter player, Canvas playground, MainWindow main, Entity owner)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
+            this.owner = owner;
 
             pathimgentity = pathpic + "magiccircleshoot.png";
 
@@ -67,7 +68,7 @@ namespace Jump.EnemyEntity
             var posleft = Canvas.GetLeft(this.entity) + 100;
             var postop = Canvas.GetTop(this.entity) + 90;
 
-            MagicMissile magicmissile = new MagicMissile(posleft, postop, player!, playground!, main!);
+            MagicMissile magicmissile = new MagicMissile(posleft, postop, player!, playground!, main!, owner!);
 
             SetMagicMissile(ref magicmissile);
 

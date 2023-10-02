@@ -46,6 +46,7 @@ namespace Jump.EnemyEntity
             this.main = main;
             this.boss = boss;
             this.circle = circle;
+            this.owner = boss; 
 
             height = 50;
             width = 50;
@@ -140,7 +141,7 @@ namespace Jump.EnemyEntity
 
             magicmissile.pathimgentity = pathpic + "magicmissile3.png";
             magicmissile.SetEntity();
-            magicmissile.movementspeed = 30;
+            magicmissile.movementspeed = 40;
 
             magicmissile.soundpath = pathsound + "magicshot2.mp3";
         }
@@ -150,7 +151,7 @@ namespace Jump.EnemyEntity
             var posleft = Canvas.GetLeft(this.entity) + 25;
             var postop = Canvas.GetTop(this.entity) - 10;
 
-            MagicMissile magicmissile = new MagicMissile(posleft, postop, player!, playground!, main!);
+            MagicMissile magicmissile = new MagicMissile(posleft, postop, player!, playground!, main!, owner!);
 
             SetMagicMissile(ref magicmissile);
 

@@ -27,6 +27,8 @@ namespace Jump
         public PlayerCharacter? player { get; set; }
         public MainWindow? main { get; set; }
         public List<string> listgun = new List<string>();
+        public MediaPlayer gunsound = new MediaPlayer();
+        public MediaPlayer reloadsound = new MediaPlayer();
 
         public string? gunsoundpath;
         public string? reloadsoundpath;
@@ -57,7 +59,6 @@ namespace Jump
 
         public void PlaySoundShoot()
         {
-            MediaPlayer gunsound = new MediaPlayer();
             gunsound.Open(new (gunsoundpath!));
             gunsound.Volume = 1;
             gunsound.Play();
@@ -65,10 +66,9 @@ namespace Jump
 
         public void PlayReloadSound()
         {
-            MediaPlayer gunsound = new MediaPlayer();
-            gunsound.Open(new(reloadsoundpath!));
-            gunsound.Volume = 1;
-            gunsound.Play();
+            reloadsound.Open(new(reloadsoundpath!));
+            reloadsound.Volume = 1;
+            reloadsound.Play();
         }
 
         public async Task Reload()

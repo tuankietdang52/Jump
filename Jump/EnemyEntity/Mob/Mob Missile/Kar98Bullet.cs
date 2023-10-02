@@ -26,11 +26,12 @@ namespace Jump.EnemyEntity
     {
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
         public Rectangle kar98bullet = new Rectangle();
-        public Kar98Bullet(double left, PlayerCharacter player, Canvas playground, MainWindow main)
+        public Kar98Bullet(double left, PlayerCharacter player, Canvas playground, MainWindow main, Bush owner)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
+            this.owner = owner;
 
             height = 10;
             width = 30;

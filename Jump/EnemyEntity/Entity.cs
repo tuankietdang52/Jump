@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jump.EnemyEntity;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,6 +33,8 @@ namespace Jump
 
         public Rectangle? healthbar = null;
         public Rectangle? secondhealthbar = null;
+
+        public Entity? owner { get; set; }
 
         public Rect entityhitbox;
 
@@ -224,7 +227,8 @@ namespace Jump
                 if (CheckArmor()) return true;
                 if (IsDead) return true;
 
-                main!.killer = this;
+                if (!this.IsBullet) main!.killer = this;
+                else main!.killer = this.owner!;
                 player!.IsDead = true;
                 return true;
             }

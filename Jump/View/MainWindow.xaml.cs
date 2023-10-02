@@ -37,15 +37,15 @@ namespace Jump
 {
     public partial class MainWindow : Window
     {
-        public int phase = 3;
-        public int mapindex = 3;
-        public int changetime = 9;
+        public int phase = 1;
+        public int mapindex = 1;
+        public int changetime = 0;
 
         public int timechange = 30;
         public int limitchangetime = 9;
 
-        public int money = 20000;
-        public int score = 200;
+        public int money = 0;
+        public int score = 0;
         public double volumeadjust = 0.2;
 
         public bool IsReplay = false;

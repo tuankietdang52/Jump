@@ -41,7 +41,6 @@ namespace Jump.Sql
             Border scorebar = new Border();
             scorebar.BorderBrush = Brushes.Red;
             scorebar.BorderThickness = new Thickness(5);
-            scorebar.Margin = new Thickness(-5, 0, 0, 0);
 
             Canvas scorebarcontent = new Canvas()
             {

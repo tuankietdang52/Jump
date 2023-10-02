@@ -27,11 +27,12 @@ namespace Jump.EnemyEntity
         public Rectangle mac10bullet = new Rectangle();
         public Entity? boss { get; set; }
 
-        public Mac10Bullet(double left, double top, PlayerCharacter player, Canvas playground, MainWindow main)
+        public Mac10Bullet(double left, double top, PlayerCharacter player, Canvas playground, MainWindow main, Samurai owner)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
+            this.owner = owner;
 
             height = 30;
             width = 30;

@@ -38,9 +38,10 @@ namespace Jump.View
             CreateButtoninMainMenu();
         }
 
-        public HighScoreView(MainWindow main)
+        public HighScoreView(MainWindow main, int score)
         {
             this.main = main;
+            this.score = score;
 
             InitializeComponent();
             UpdateScore();
@@ -57,6 +58,7 @@ namespace Jump.View
         {
             ButtonQuit();
             CreateButtonSave();
+            GetYourScore();
         }
 
         public void HideTypeScore()
@@ -64,6 +66,8 @@ namespace Jump.View
             ScoreType.Visibility = Visibility.Collapsed;
             Save.Visibility = Visibility.Collapsed;
             SaveScoreTxt.Visibility = Visibility.Collapsed;
+            scoretxt.Visibility = Visibility.Collapsed;
+            yourscoretxt.Visibility = Visibility.Collapsed;
         }
 
         public void ButtonQuit()
@@ -92,6 +96,11 @@ namespace Jump.View
             Save.Click += HandleSave;
         }
 
+        public void GetYourScore()
+        {
+            yourscoretxt.Text = Convert.ToString(score);
+        }
+
         public void NonEditScoreType()
         {
             ScoreType.IsReadOnly = true;
@@ -108,7 +117,7 @@ namespace Jump.View
         private void DoneType(object sender, RoutedEventArgs e)
         {
             Keyboard.Focus(this);
-            main!.KeyDown += main.ReplayKey;
+            if (!main!.IsWin) main!.KeyDown += main.ReplayKey;
         }
 
         public void HandleSave(object sender, RoutedEventArgs e)

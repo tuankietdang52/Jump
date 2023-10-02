@@ -115,7 +115,7 @@ namespace Jump.EnemyEntity
         {
             string pathsoundeffect = pathsound + "kar98.mp3";
 
-            Kar98Bullet kar98bullet = new Kar98Bullet(left, player!, playground!, main!);
+            Kar98Bullet kar98bullet = new Kar98Bullet(left, player!, playground!, main!, this);
 
             kar98bullet.movementspeed = bulletspeed;
 

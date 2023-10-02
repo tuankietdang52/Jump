@@ -15,7 +15,9 @@
                 </LinearGradientBrush>
             </Canvas.Background>
             <TextBlock Text="HIGHSCORE" FontSize="70" Foreground="Red" FontWeight="Bold"/>
-            <ListView x:Name="HighScoreList" Height="361" Width="750" Canvas.Left="124" Canvas.Top="115" HorizontalAlignment="Center" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Disabled" BorderThickness="0" Background="Transparent" d:ItemsSource="{d:SampleData ItemCount=5}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Hidden" Height="361" Canvas.Left="124" Canvas.Top="115">
+                <ItemsControl x:Name="HighScoreList" Width="750" Canvas.Left="124" Canvas.Top="115" HorizontalAlignment="Center" VerticalAlignment="Top" BorderThickness="0" Background="Transparent" d:ItemsSource="{d:SampleData ItemCount=5}"/>
+            </ScrollViewer>
             <Button x:Name="Quit" Width="172" Height="65" Canvas.Left="74" Canvas.Top="513" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <TextBlock x:Name="SaveScoreTxt" Text="Save Your Score (8 or less character):" Height="68" Width="419" Canvas.Left="313" Canvas.Top="485" TextWrapping="Wrap" TextAlignment="Left" FontSize="25" Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <TextBox x:Name="ScoreType" FontSize="35" FontWeight="Bold" Foreground="LightSkyBlue" Width="300" Height="50" Canvas.Left="313" Canvas.Top="528" GotKeyboardFocus="TypeText" LostFocus="DoneType" HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -24,6 +26,8 @@
                 </TextBox.Background>
             </TextBox>
             <Button x:Name="Save" Width="95" Height="50" Canvas.Left="618" Canvas.Top="528" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBlock x:Name="scoretxt" Canvas.Left="787" TextWrapping="Wrap" Canvas.Top="498" Height="48" Width="167" HorizontalAlignment="Center" VerticalAlignment="Top" Text="Your Score:" Foreground="White" FontSize="30" TextAlignment="Center"/>
+            <TextBlock x:Name="yourscoretxt" Canvas.Left="787" TextWrapping="Wrap" Canvas.Top="546" Height="46" Width="167" Text="0" Foreground="White" FontSize="30" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         </Canvas>
     </Viewbox>
 </UserControl>

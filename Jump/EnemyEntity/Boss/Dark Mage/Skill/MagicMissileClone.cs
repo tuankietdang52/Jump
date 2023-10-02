@@ -30,12 +30,12 @@ namespace Jump.EnemyEntity
         public Rectangle magicmissileclone = new Rectangle();
         public Entity? boss { get; set; }
 
-
-        public MagicMissileClone(PlayerCharacter player, Canvas playground, MainWindow main)
+        public MagicMissileClone(PlayerCharacter player, Canvas playground, MainWindow main, DarkMage owner)
         {
             this.player = player;
             this.playground = playground;
             this.main = main;
+            this.owner = owner;
 
             height = 30;
             width = 50;

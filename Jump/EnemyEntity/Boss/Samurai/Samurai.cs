@@ -186,7 +186,7 @@ namespace Jump.EnemyEntity
 
         public async void CreateBullet(double left, double top)
         {
-            Mac10Bullet mac10Bullet = new Mac10Bullet(left, top, player!, playground!, main!);
+            Mac10Bullet mac10Bullet = new Mac10Bullet(left, top, player!, playground!, main!, this);
 
             mac10Bullet.boss = this;
 
