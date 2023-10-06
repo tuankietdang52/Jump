@@ -69,7 +69,7 @@ namespace Jump
         {
             setElement(137, 86);
 
-            ChangeGun("r8");
+            ChangeGun("de");
             inventory.Add("de");
 
             playershape.Fill = new ImageBrush

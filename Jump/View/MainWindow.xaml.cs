@@ -47,7 +47,7 @@ namespace Jump
         public int timechange = 30;
         public int limitchangetime = 9;
 
-        public int money = 30000;
+        public int money = 0;
         public int score = 0;
         public double volumeadjust = 0.2;
 
