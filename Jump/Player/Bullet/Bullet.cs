@@ -79,7 +79,7 @@ namespace Jump
 
                 if (HitEntity())
                 {
-                    if (!player.IsHaveAwp) return;
+                    if (!player.IsHaveSniper) return;
                 }
             }
         }

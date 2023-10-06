@@ -45,8 +45,9 @@ namespace Jump
         public bool IsVietCongKilled = false;
         public bool IsDefaultDead = false;
         public bool IsHaveArmor = false;
-        public bool IsHaveAwp = false;
+        public bool IsHaveSniper = false;
         public bool IsDead = false;
+        public bool IsR8 = false;
 
         public bool IsJump = false;
         public bool IsHoldCtrlLeft = false;
@@ -62,12 +63,13 @@ namespace Jump
         public string? jumpgun { get; set; }
         public string? jumpshoot { get; set; }
         public string? crouchshoot { get; set; }
+        public string? currentgun { get; set; }
 
         public PlayerCharacter()
         {
             setElement(137, 86);
 
-            ChangeGun("awp");
+            ChangeGun("r8");
             inventory.Add("de");
 
             playershape.Fill = new ImageBrush
@@ -86,7 +88,7 @@ namespace Jump
             if (IsDead || main!.IsQuit || main.IsReplay)
             {
                 IsHaveArmor = false;
-                IsHaveAwp = false;
+                IsHaveSniper = false;
                 ChangeGun("de");
             }
             IsDead = false;
@@ -229,12 +231,41 @@ namespace Jump
                     AWP awp = new AWP(this, main!);
                     gun = awp;
                     indexgun = 2;
-                    IsHaveAwp = true;
+                    IsHaveSniper = true;
+                    break;
+
+                case "m4a1s":
+                    M4A1S m4a1s = new M4A1S(this, main!);
+                    gun = m4a1s;
+                    indexgun = 3;
+                    break;
+
+                case "ak47":
+                    AK47 ak47 = new AK47(this, main!);
+                    gun = ak47;
+                    indexgun = 4;
+                    break;
+
+                case "ssg08":
+                    SSG08 ssg08 = new SSG08(this, main!);
+                    gun = ssg08;
+                    indexgun = 5;
+                    IsHaveSniper = true;
+                    break;
+
+                case "r8":
+                    R8 r8 = new R8(this, main!);
+                    gun = r8;
+                    indexgun = 6;
+                    IsR8 = true;
                     break;
             }
 
             gun.getPathPlayer();
             gun.getSound();
+            currentgun = gunname;
+            if (indexgun != 2 && indexgun != 5) IsHaveSniper = false;
+            if (indexgun != 6) IsR8 = false;
         }
 
 
@@ -298,7 +329,27 @@ namespace Jump
             CreateBullet();
         }
 
-        public async void HandleAwpShoot()
+        public async void HandleR8Shoot()
+        {
+            if (IsReload) return;
+
+            if (gun.bulletAmount <= 0) return;
+
+            if (IsShoot) return;
+
+            IsShoot = true;
+
+            gun.OtherGunSound();
+            await Task.Delay(300);
+
+            gun.bulletAmount--;
+
+            main!.AmountBullet();
+
+            CreateBullet();
+        }
+
+        public async void HandleSniperShoot()
         {
             if (IsReload) return;
 
@@ -314,9 +365,9 @@ namespace Jump
             CreateBullet();
 
             await Task.Delay(500);
-            main.item.PlaySound("awp");
+            gun.OtherGunSound();
 
-            await Task.Delay(800);
+            await Task.Delay(gun.waittime);
             IsShoot = false;
         }
 
@@ -441,7 +492,8 @@ namespace Jump
 
             await bullet.Move();
 
-            if (!IsHaveAwp) IsShoot = false; 
+            if (IsR8) main!.ReleaseJ();
+            if (!IsHaveSniper) IsShoot = false; 
 
             playground.Children.Remove(bullet.bullet);
             await Task.Delay(200);

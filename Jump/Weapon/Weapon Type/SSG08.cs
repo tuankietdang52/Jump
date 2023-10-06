@@ -8,69 +8,69 @@ using System.Windows.Media;
 
 namespace Jump.Weapon.Weapon_Type
 {
-    public class AWP : Gun
+    public class SSG08 : Gun
     {
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
 
         public MediaPlayer awpwaitsound = new MediaPlayer();
 
-        public AWP()
+        public SSG08()
         {
-            cost = 4750;
+            cost = 1700;
         }
 
-        public AWP(PlayerCharacter player, MainWindow main)
+        public SSG08(PlayerCharacter player, MainWindow main)
         {
             this.player = player;
             this.main = main;
 
-            damage = 80;
-            bulletlimit = 5;
-            magazinebulletlimit = 30;
+            damage = 40;
+            bulletlimit = 10;
+            magazinebulletlimit = 90;
 
             bulletAmount = bulletlimit;
             magazinebullet = magazinebulletlimit;
 
-            waittime = 800;
-            reloadtime = 1800;
+            waittime = 500;
+            reloadtime = 2600;
 
             bulletspeed = 100;
         }
 
         public override void getPathPlayer()
         {
-            player!.stand = pathpic + "awpstand.png";
-            player!.standshoot = pathpic + "awpshoot.png";
-            player!.crouchshoot = pathpic + "awpcrouchshoot.png";
-            player!.jumpgun = pathpic + "awpjump.png";
-            player!.jumpshoot = pathpic + "awpjumpshoot.png";
+            player!.stand = pathpic + "ssg08stand.png";
+            player!.standshoot = pathpic + "ssg08shoot.png";
+            player!.crouchshoot = pathpic + "ssg08crouchshoot.png";
+            player!.jumpgun = pathpic + "ssg08jump.png";
+            player!.jumpshoot = pathpic + "ssg08jumpshoot.png";
         }
 
         public override void getSound()
         {
-            gunsoundpath = pathsound + "awpsound.mp3";
-            reloadsoundpath = pathsound + "awpreload.mp3";
+            gunsoundpath = pathsound + "ssg08sound.mp3";
+            reloadsoundpath = pathsound + "ssg08reload.mp3";
         }
 
         public override string getPathCost()
         {
-            return pathpic + "awpcost.png";
+            return pathpic + "ssg08cost.png";
         }
 
         public override string getPathGun()
         {
-            return pathpic + "awp.png";
+            return pathpic + "ssg08.png";
         }
 
         public override string getPathBuySound()
         {
-            return pathsound + "awpbuy.mp3";
+            return pathsound + "ssg08buy.mp3";
         }
 
         public override void OtherGunSound()
         {
-            awpwaitsound.Open(new(pathsound + "awpbuy.mp3"));
+            awpwaitsound.Open(new(pathsound + "ssg08buy.mp3"));
             awpwaitsound.Volume = 1;
             awpwaitsound.Play();
         }

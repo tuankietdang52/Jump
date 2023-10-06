@@ -118,7 +118,6 @@ namespace Jump.EnemyEntity
         public override async Task Action()
         {
             CreateHealthBar(700);
-
             double pos = Canvas.GetLeft(this.entity);
 
             Stopwatch skilltime = new Stopwatch();

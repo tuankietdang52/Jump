@@ -7,61 +7,60 @@ using System.Threading.Tasks;
 
 namespace Jump.Weapon.Weapon_Type
 {
-    public class M4A4 : Gun
+    public class AK47 : Gun
     {
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
-
-        public M4A4()
+        
+        public AK47()
         {
-            cost = 3100;
+            cost = 2700;
         }
-
-        public M4A4(PlayerCharacter player, MainWindow main)
+        public AK47(PlayerCharacter player, MainWindow main)
         {
             this.player = player;
             this.main = main;
 
-            damage = 45;
+            damage = 65;
             bulletlimit = 30;
             magazinebulletlimit = 90;
 
-            reloadtime = 1800;
+            reloadtime = 1700;
 
             bulletAmount = bulletlimit;
             magazinebullet = magazinebulletlimit;
 
-            bulletspeed = 100;
+            bulletspeed = 70;
         }
 
         public override void getPathPlayer()
         {
-            player!.stand = pathpic + "m4a4stand.png";
-            player!.standshoot = pathpic + "m4a4shoot.png";
-            player!.crouchshoot = pathpic + "m4a4crouchshoot.png";
-            player!.jumpgun = pathpic + "m4a4jump.png";
-            player!.jumpshoot = pathpic + "m4a4jumpshoot.png";
+            player!.stand = pathpic + "ak47stand.png";
+            player!.standshoot = pathpic + "ak47shoot.png";
+            player!.crouchshoot = pathpic + "ak47crouchshoot.png";
+            player!.jumpgun = pathpic + "ak47jump.png";
+            player!.jumpshoot = pathpic + "ak47jumpshoot.png";
         }
 
         public override void getSound()
         {
-            gunsoundpath = pathsound + "m4a4sound.mp3";
-            reloadsoundpath = pathsound + "m4a4reload.mp3";
+            gunsoundpath = pathsound + "ak47sound.mp3";
+            reloadsoundpath = pathsound + "ak47reload.mp3";
         }
 
         public override string getPathCost()
         {
-            return pathpic + "m4a4cost.png";
+            return pathpic + "ak47cost.png";
         }
 
         public override string getPathGun()
         {
-            return pathpic + "m4a4.png";
+            return pathpic + "ak47.png";
         }
 
         public override string getPathBuySound()
         {
-            return pathsound + "m4a4buy.mp3";
+            return pathsound + "ak47buy.mp3";
         }
     }
 }

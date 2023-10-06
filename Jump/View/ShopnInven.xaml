@@ -20,19 +20,21 @@
                         <StackPanel.Background>
                             <ImageBrush ImageSource="/Picture/shopbackground.png" />
                         </StackPanel.Background>
-                        <StackPanel Name="equipment" Height="325" Width="900" Orientation="Horizontal" Background="Transparent"/>
-                        <StackPanel x:Name="rifle" Height="325" Width="900" Orientation="Horizontal" Background="Transparent"/>
+                        <StackPanel Name="riflestall" Height="325" Width="900" Orientation="Horizontal" Background="Transparent"/>
+                        <StackPanel x:Name="riflestall2" Height="325" Width="900" Orientation="Horizontal" Background="Transparent"/>
                     </StackPanel>
                 </TabItem>
                 <TabItem x:Name="inventory" Height="100" Width="100" Background="Black">
                     <TabItem.Header>
                         <Image Source="/Picture/inventory.jpg" Stretch="Fill"/>
                     </TabItem.Header>
-                    <StackPanel x:Name="inventoryitem" Width="900" Height="650" Orientation="Horizontal">
-                        <StackPanel.Background>
-                            <ImageBrush ImageSource="/Picture/inventorybackground.jpg"/>
-                        </StackPanel.Background>
-                    </StackPanel>
+                    <ScrollViewer Height="650" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+                        <ItemsControl x:Name="inventoryitem" Width="900" >
+                            <ItemsControl.Background>
+                                <ImageBrush ImageSource="/Picture/inventorybackground.jpg"/>
+                            </ItemsControl.Background>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </TabItem>
             </TabControl>
             <Button x:Name="play" Height="100" Width="103" Margin="0, 550, 1000, 0" Click="HandleContinue">

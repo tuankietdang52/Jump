@@ -40,12 +40,19 @@ namespace Jump
         public int bulletlimit;
         public int magazinebullet;
         public int magazinebulletlimit;
+        public int waittime { get; set; }
+        public int cost { get; set; }
+
+        public int reloadtime { get; set; }
 
         public Gun()
         {
             listgun.Add("de");
             listgun.Add("m4a4");
             listgun.Add("awp");
+            listgun.Add("m4a1s");
+            listgun.Add("ak47");
+            listgun.Add("ssg08");
         }
 
         public void setOwnerGun(PlayerCharacter player, MainWindow main)
@@ -53,6 +60,12 @@ namespace Jump
             this.player = player;
             this.main = main;
         }
+
+        public virtual string getPathCost() { return ""; }
+
+        public virtual string getPathGun() { return ""; }
+
+        public virtual string getPathBuySound() { return ""; }
 
         public virtual void getPathPlayer() { }
         public virtual void getSound() { }
@@ -71,6 +84,8 @@ namespace Jump
             reloadsound.Play();
         }
 
+        public virtual void OtherGunSound() { }
+
         public async Task Reload()
         {
             if (magazinebullet <= 0)
@@ -81,7 +96,7 @@ namespace Jump
 
             PlayReloadSound();
 
-            await Task.Delay(1600);
+            await Task.Delay(reloadtime);
 
             if (magazinebullet < bulletlimit)
             {

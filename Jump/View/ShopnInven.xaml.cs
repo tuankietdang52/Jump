@@ -38,8 +38,8 @@ namespace Jump.View
 
         public void SetShopnInven()
         {
-            ItemEquipmentStalls();
             ItemRifleStalls();
+            ItemRifleStalls2();
         }
 
         public void ShowMyMoney()
@@ -47,16 +47,18 @@ namespace Jump.View
             mymoney.Text = Convert.ToString("$" + main!.money);
         }
 
-        public void ItemEquipmentStalls()
-        {
-
-
-        }
-
         public void ItemRifleStalls()
         {
-            AddItemShop("m4a4", rifle);
-            AddItemShop("awp", rifle);
+            AddItemShop("r8", riflestall);
+            AddItemShop("ssg08", riflestall);
+            AddItemShop("m4a1s", riflestall);
+        }
+
+        public void ItemRifleStalls2()
+        {
+            AddItemShop("ak47", riflestall2);
+            AddItemShop("m4a4", riflestall2);
+            AddItemShop("awp", riflestall2);
         }
 
         public void AddItemShop(string gunname, StackPanel stalls)
@@ -69,17 +71,26 @@ namespace Jump.View
                 shopninven = this,
             };
 
-            stalls.Children.Add(newitem.Additem(gunname));
+            newitem.getGunType();
+
+            stalls.Children.Add(newitem.Additem());
         }
 
         // INVENTORY //
 
         public void AddItemInventory()
         {
-            inventoryitem.Children.Clear();
+            inventoryitem.Items.Clear();
+
+            StackPanel itemstalls = NewItemStalls();
 
             foreach (var item in this.main!.player.inventory)
             {
+                if (itemstalls.Children.Count == 3)
+                {
+                    itemstalls = NewItemStalls();
+                }
+
                 Inventory newitem = new Inventory()
                 {
                     IsBuy = true,
@@ -89,8 +100,24 @@ namespace Jump.View
                     shopninven = this,
                 };
 
-                inventoryitem.Children.Add(newitem.Additem(item));
+                newitem.getGunType();
+
+                itemstalls.Children.Add(newitem.Additem());
             }
+        }
+
+        public StackPanel NewItemStalls()
+        {
+            StackPanel itemstalls = new StackPanel()
+            {
+                Height = 325,
+                Width = 900,
+                Orientation = Orientation.Horizontal,
+            };
+
+            inventoryitem.Items.Add(itemstalls);
+
+            return itemstalls;
         }
 
         public void UpdateInventory(object sender, SelectionChangedEventArgs e)

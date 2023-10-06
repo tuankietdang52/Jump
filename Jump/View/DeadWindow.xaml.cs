@@ -73,7 +73,7 @@ namespace Jump.View
             GetNameMap();
             GetCurrentScore();
             GetKillerImg();
-            GetGun();
+            SetGun();
         }
 
         public void GetCurrentScore()
@@ -134,33 +134,9 @@ namespace Jump.View
             Map.Foreground = color;
         }
 
-        public void GetGun()
+        public void SetGun()
         {
-            string namegun = "de";
-            switch (main!.player.indexgun)
-            {
-                case 0:
-                    namegun = "de";
-                    break;
-
-                case 1:
-                    namegun = "m4a4";
-                    break;
-
-                case 2:
-                    namegun = "awp";
-                    break;
-
-                default:
-                    break;
-
-            }
-            SetGun(namegun);
-        }
-
-        public void SetGun(string namegun)
-        {
-            namegun = pathpic + namegun + ".png";
+            string namegun = main!.player.gun.getPathGun();
             Gun.Fill = new ImageBrush
             {
                 ImageSource = new BitmapImage(new(namegun)),

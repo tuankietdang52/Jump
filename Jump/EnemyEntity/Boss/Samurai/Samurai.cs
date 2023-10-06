@@ -334,6 +334,7 @@ namespace Jump.EnemyEntity
                     await Task.Delay(1);
                     continue;
                 }
+                if (IsDead) return;
 
                 TimeSpan move = TimeSpan.FromSeconds(0.01);
                 await Task.Delay(move);
@@ -367,6 +368,7 @@ namespace Jump.EnemyEntity
                     await Task.Delay(1);
                     continue;
                 }
+                if (IsDead) return;
 
                 TimeSpan move = TimeSpan.FromSeconds(0.04);
                 await Task.Delay(move);

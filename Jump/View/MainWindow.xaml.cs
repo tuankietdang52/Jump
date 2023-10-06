@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+// LMAO NOOB CODE //
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,7 +47,7 @@ namespace Jump
         public int timechange = 30;
         public int limitchangetime = 9;
 
-        public int money = 0;
+        public int money = 30000;
         public int score = 0;
         public double volumeadjust = 0.2;
 
@@ -59,6 +62,7 @@ namespace Jump
         public bool IsQuit = false;
         public bool InShopnInven = false;
         public bool InShop = false;
+        public bool ShopBeforeBoss = false;
         public bool InInventory = false;
         public bool IsClickReplay = false;
         public bool IsWin = false;
@@ -342,6 +346,9 @@ namespace Jump
                 case Kamikaze:
                     GetMoney(150);
                     break;
+                case DarkMage:
+                    GetMoney(5000);
+                    break;
                 default:
                     GetMoney(50);
                     break;
@@ -527,11 +534,16 @@ namespace Jump
                 if (changetime % 3 == 0 && changetime != 0)
                 {
                     if (IsHaveBoss) continue;
-                    
+
+                    ReadyToShop();
+                    ShopBeforeBoss = true;
+                    while (ShopBeforeBoss)
+                    {
+                        await Task.Delay(1);
+                    }
+
                     ClearEntity();
                     theme.Stop();
-
-                    await ChangeMap();
 
                     await Task.Delay(2000);
 
@@ -763,6 +775,7 @@ namespace Jump
             IsChangeMap = false;
             NotChangeMap = false;
             InShopnInven = false;
+            ShopBeforeBoss = false;
             IsHaveBoss = false;
             IsWin = false;
             IsReplay = false;
@@ -772,7 +785,7 @@ namespace Jump
             IsWin = false;
 
             setphase.AlreadyHaveBoss = false;
-    }
+        }
 
         public void RestartNumberElement()
         {
@@ -855,6 +868,7 @@ namespace Jump
 
         private void CheckEntity(Entity entity)
         {
+            // no idea why it work but it work, whatever //
             // entity get hit by bullet //
             if (entity.getHit)
             {
@@ -952,7 +966,31 @@ namespace Jump
             }
 
             Playground.Children.Remove(armor.item);
-            items.Add(armor);
+            items.Remove(armor);
+        }
+
+        public void BuyArmor()
+        {
+            if (player.IsHaveArmor) return;
+            if (!CheckMoneyBuyArmor()) return;
+
+            player.IsHaveArmor = true;
+            Armor armor = new Armor()
+            {
+                player = this.player,
+                playground = Playground,
+                main = this
+            };
+            armor.ShowArmor();
+        }
+
+        public bool CheckMoneyBuyArmor()
+        {
+            if (money < 600) return false;
+
+            money -= 600;
+            Money.Text = "Money: " + money;
+            return true;
         }
 
         public void BreakArmorUI()
@@ -1043,8 +1081,13 @@ namespace Jump
                     break;
 
                 case Key.J:
-                    if (!player.IsHaveAwp) player.HandleShoot();
-                    else player.HandleAwpShoot();
+                    if (player.IsR8) player.HandleR8Shoot();
+                    else if (player.IsHaveSniper) player.HandleSniperShoot();
+                    else player.HandleShoot();
+                    break;
+
+                case Key.K:
+                    BuyArmor();
                     break;
 
                 case Key.R:
@@ -1095,7 +1138,7 @@ namespace Jump
             
         }
 
-        // Release Key //   
+        // RELEASE KEY //   
 
         private void ReleaseCtrlLeft()
         {
@@ -1111,7 +1154,7 @@ namespace Jump
 
         }
 
-        private void ReleaseJ()
+        public void ReleaseJ()
         {
             var top = Canvas.GetTop(player.playershape);
             if (top >= 250) Canvas.SetTop(player.playershape, 260);
@@ -1146,7 +1189,12 @@ namespace Jump
             try
             {
                 InShopnInven = false;
-                GameStart();
+                if (!ShopBeforeBoss) GameStart();
+                else
+                {
+                    ShopBeforeBoss = false;
+                    return;
+                }
             }
             catch (Exception ex)
             {
@@ -1202,7 +1250,7 @@ namespace Jump
 
         public void HandlePause()
         {
-            if (InShopnInven && player.IsDead) return;
+            if (InShopnInven && ShopBeforeBoss && player.IsDead) return;
 
             IsPause = true;
             Pause pausewindow = new Pause(this);
@@ -1213,7 +1261,7 @@ namespace Jump
             Main.KeyDown += PauseKey;
         }
 
-        // QUIT //
+            // QUIT //
 
         public void Quit(UserControl window)
         {

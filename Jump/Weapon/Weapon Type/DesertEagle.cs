@@ -11,6 +11,9 @@ namespace Jump.Weapon.Weapon_Type
     {
         private readonly string pathpic = $"{Directory.GetCurrentDirectory()}\\Picture\\";
         private readonly string pathsound = $"{Directory.GetCurrentDirectory()}\\Sound\\";
+
+        public DesertEagle() { }
+
         public DesertEagle(PlayerCharacter player, MainWindow main)
         {
             this.player = player;
@@ -19,6 +22,8 @@ namespace Jump.Weapon.Weapon_Type
             damage = 50;
             bulletlimit = 7;
             magazinebulletlimit = 35;
+
+            reloadtime = 1500;
 
             bulletAmount = bulletlimit;
             magazinebullet = magazinebulletlimit;
@@ -39,6 +44,16 @@ namespace Jump.Weapon.Weapon_Type
         {
             gunsoundpath = pathsound + "desound.mp3";
             reloadsoundpath = pathsound + "dereload.mp3";
+        }
+
+        public override string getPathGun()
+        {
+            return pathpic + "de.png";
+        }
+
+        public override string getPathBuySound()
+        {
+            return pathsound + "debuy.mp3";
         }
     }
 }

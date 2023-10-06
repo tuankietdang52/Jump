@@ -1,4 +1,5 @@
 ﻿using Jump.View;
+using Jump.Weapon.Weapon_Type;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
@@ -33,6 +34,9 @@ namespace Jump
         public bool IsUse = false;
 
         public int cost { get; set; }
+        public string? pathcost { get; set; }
+        public string? pathgunimg { get; set; }
+        public string? pathbuysound { get; set; }
 
         public MainWindow? main { get; set; }
         public PlayerCharacter? player { get; set; }
@@ -40,29 +44,82 @@ namespace Jump
         public MediaPlayer buysound = new MediaPlayer();
         public ShopnInven? shopninven { get; set; }
 
-        public bool AlreadyHaveGun(string gunname)
+
+        public void getGunType()
+        {
+            switch (name)
+            {
+                case "de":
+                    DesertEagle de = new DesertEagle();
+                    gun = de;
+                    break;
+
+                case "m4a4":
+                    M4A4 m4a4 = new M4A4();
+                    gun = m4a4;
+                    break;
+
+                case "awp":
+                    AWP awp = new AWP();
+                    gun = awp;
+                    break;
+
+                case "m4a1s":
+                    M4A1S m4a1s = new M4A1S();
+                    gun = m4a1s;
+                    break;
+
+                case "ak47":
+                    AK47 ak47 = new AK47();
+                    gun = ak47;
+                    break;
+
+                case "ssg08":
+                    SSG08 ssg08 = new SSG08();
+                    gun = ssg08;
+                    break;
+
+                case "r8":
+                    R8 r8 = new R8();
+                    gun = r8;
+                    break;
+            }
+
+            getElementGun();
+        }
+
+        public void getElementGun()
+        {
+            gun.player = this.player;
+            cost = gun.cost;
+            pathgunimg = gun.getPathGun();
+            pathcost = gun.getPathCost();
+            pathbuysound = gun.getPathBuySound();
+        }
+
+        public bool AlreadyHaveGun()
         {
             foreach (var item in player!.inventory)
             {
-                if (gunname == item) return true;
+                if (name == item) return true;
             }
             return false;
         }
 
-        public void getPathButtonImg(ref string buttonimg, string gunname)
+        public void getPathButtonImg(ref string buttonimg)
         {
             if (!IsBuy)
             {
-                if (AlreadyHaveGun(gunname)) buttonimg = pathpic + "alreadybuy.png";
+                if (AlreadyHaveGun()) buttonimg = pathpic + "alreadybuy.png";
                 else buttonimg = pathpic + "buy.png";
             }
 
-            else buttonimg = CheckGunUsed(gunname);
+            else buttonimg = CheckGunUsed();
         }
 
-        public void PlaySound(string gunname)
+        public void PlaySound()
         {
-            buysound.Open(new(pathsound + gunname + "buy.mp3"));
+            buysound.Open(new(pathbuysound!));
             buysound.Volume = 1;
             buysound.Play();
         }
@@ -71,7 +128,7 @@ namespace Jump
         {
             Rectangle img = new Rectangle()
             {
-                Width = 300,
+                Width = 250,
                 Height = 210,
                 Fill = new ImageBrush
                 {
@@ -109,7 +166,7 @@ namespace Jump
         {
             Button buy = new Button()
             {
-                Width = 300,
+                Width = 250,
                 Height = 100,
                 Content = new Image
                 {
@@ -137,7 +194,7 @@ namespace Jump
             return use;
         }
 
-        public Button CreateButton(string buttonimg, string gunname)
+        public Button CreateButton(string buttonimg)
         {
             Button button;
             if (main!.InShop) button = ButtonBuy(buttonimg);
@@ -145,10 +202,10 @@ namespace Jump
 
             if (!IsBuy)
             {
-                if (!AlreadyHaveGun(gunname))
+                if (!AlreadyHaveGun())
                 {
                     button.Click += Buy;
-                    button.ToolTip = ShowCost(gunname);
+                    button.ToolTip = ShowCost();
                 }
             }
             else button.Click += UseGun;
@@ -156,48 +213,32 @@ namespace Jump
             return button;
         }
 
-        public Image ShowCost(string gunname)
+        public Image ShowCost()
         {
             Image cost = new Image()
             {
                 Height = 50,
                 Width = 100,
-                Source = new BitmapImage(new (getPathCost(gunname))),
+                Source = new BitmapImage(new (pathcost!)),
             };
             return cost;
         }
 
-        public string getPathCost(string gunname)
-        {
-            switch (gunname)
-            {
-                case "m4a4":
-                    return pathpic + "m4a4cost.png";
-
-                case "awp":
-                    return pathpic + "awpcost.png";
-
-                default:
-                    return "";
-            }
-        }
-
-        public StackPanel Additem(string gunname)
+        public StackPanel Additem()
         {
             string buttonimg = "";
-            string pathgunimg = pathpic + gunname + ".png";
 
             StackPanel item = new StackPanel()
             {
-                Width = 325,
+                Width = 275,
                 Height = 325,
             };
 
-            var img = CreateImage(pathgunimg);
+            var img = CreateImage(pathgunimg!);
 
-            getPathButtonImg(ref buttonimg, gunname);
+            getPathButtonImg(ref buttonimg);
 
-            var button = CreateButton(buttonimg, gunname);
+            var button = CreateButton(buttonimg);
 
             item.Children.Add(img);
             item.Children.Add(button);
@@ -205,42 +246,24 @@ namespace Jump
             return item;
         }
 
-        public bool CheckCost(string gunname)
+        public bool CheckCost()
         {
-            switch (name)
-            {
-                case "m4a4":
-                    cost = 3100;
-                    break;
-
-                case "awp":
-                    cost = 4750;
-                    break;
-
-                default:
-                    cost = 0;
-                    break;
-            }
-
             if (main!.money < cost) return false;
-            else
-            {
-                main.money -= cost;
-                shopninven!.ShowMyMoney();
-                return true;
-            }
+                
+            main.money -= cost;
+            shopninven!.ShowMyMoney();
+            return true;
         }
 
         public void Buy(object sender, RoutedEventArgs e)
         {
-            if (!CheckCost(name!)) return;
+            if (!CheckCost()) return;
 
             Button? buy = sender as Button;
-            gun.player = this.player;
 
             GetItem();
 
-            PlaySound(name!);
+            PlaySound();
 
             buy!.Content = new Image
             {
@@ -265,14 +288,14 @@ namespace Jump
 
             player!.ChangeGun(name!);
 
-            if (!IsUse) PlaySound(name!);
+            if (!IsUse) PlaySound();
 
             shopninven!.AddItemInventory();
         }
 
-        public string CheckGunUsed(string gunname)
+        public string CheckGunUsed()
         {
-            if (gun.listgun[player!.indexgun] == gunname)
+            if (player!.currentgun == name)
             {
                 IsUse = true;
                 return pathpic + "inuse.png";
