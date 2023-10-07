@@ -31,6 +31,7 @@ namespace Jump.View
             SetShopnInven();
             ShowMyMoney();
         }
+
         public void HandleContinue(object sender, RoutedEventArgs e)
         {
             main!.ContinueToGame(this);

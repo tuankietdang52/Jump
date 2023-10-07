@@ -671,8 +671,10 @@ namespace Jump.EnemyEntity
             var pos = Canvas.GetLeft(this.entity);
             var postop = Canvas.GetTop(this.entity);
 
-            CreateHealthBar(1000);
-            CreateSecondHealthbar(1000);
+            //CreateHealthBar(1000);
+            //CreateSecondHealthbar(1000);
+            CreateHealthBar(1);
+            CreateSecondHealthbar(0);
 
             timemove.Start();
             skilltime.Start();
@@ -702,8 +704,8 @@ namespace Jump.EnemyEntity
 
                 Move(ref pos, ref postop);
 
-                if (!IsCreateClone) UseSkill();
-                else CloneMagic();
+                //if (!IsCreateClone) UseSkill();
+                //else CloneMagic();
             }
 
             CreateMagicCircleDead();

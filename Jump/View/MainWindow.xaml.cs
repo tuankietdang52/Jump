@@ -448,6 +448,27 @@ namespace Jump
             PlayTheme(themepath!, volumeadjust);
         }
 
+        public void SetChangeTime()
+        {
+            switch (mapindex)
+            {
+                case 1:
+                    changetime = 0;
+                    break;
+
+                case 2:
+                    changetime = 4;
+                    break;
+
+                case 3:
+                    changetime = 7;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         public async void GameStart()
         {
             IsQuit = false;
@@ -461,6 +482,7 @@ namespace Jump
 
             await Task.Delay(2000);
 
+            SetChangeTime();
             PlayTheme(themepath!, volumeadjust);
             
             if (!IsChangeMap) FirstStartGame();

@@ -36,7 +36,7 @@ namespace Jump.EnemyEntity
             height = 10;
             width = 30;
 
-            top = 250;
+            top = 243;
             this.left = left;
 
             pathimgentity = pathpic + "kar98bullet.png";
