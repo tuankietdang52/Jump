@@ -671,10 +671,8 @@ namespace Jump.EnemyEntity
             var pos = Canvas.GetLeft(this.entity);
             var postop = Canvas.GetTop(this.entity);
 
-            //CreateHealthBar(1000);
-            //CreateSecondHealthbar(1000);
-            CreateHealthBar(1);
-            CreateSecondHealthbar(0);
+            CreateHealthBar(1000);
+            CreateSecondHealthbar(1000);
 
             timemove.Start();
             skilltime.Start();
