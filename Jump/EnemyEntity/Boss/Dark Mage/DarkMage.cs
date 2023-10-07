@@ -702,8 +702,8 @@ namespace Jump.EnemyEntity
 
                 Move(ref pos, ref postop);
 
-                //if (!IsCreateClone) UseSkill();
-                //else CloneMagic();
+                if (!IsCreateClone) UseSkill();
+                else CloneMagic();
             }
 
             CreateMagicCircleDead();
