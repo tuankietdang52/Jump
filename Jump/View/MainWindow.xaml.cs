@@ -1197,6 +1197,13 @@ namespace Jump
             player.playershape.Visibility = Visibility.Visible;
         }
 
+        public void DeletePauseElementInShop()
+        {
+            var window = (UserControl)Playground.FindName("Pause");
+
+            Resume(window);
+        }
+
         public async void ContinueToGame(ShopnInven shopnninven)
         {
             Playground.Children.Remove(shopnninven);
@@ -1243,6 +1250,7 @@ namespace Jump
 
         public async void ReadyToShop()
         {
+            if (IsPause) DeletePauseElementInShop();
             InShopElement();
             ClearEntity();
 
